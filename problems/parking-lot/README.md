@@ -4,7 +4,11 @@ In this chapter, we explore the object-oriented design of a Parking Lot system, 
 
 To build this system, we first need to clarify its requirements.
 
-![Parking Lot](/resources/images/problems/parking-lot/img1.png)
+![Parking Lot](./images/img1.png)
+
+## How to approach the problem
+
+![](/resources/images/problems/steps-to-solve-problem.png)
 
 ## Requirements Gathering
 
@@ -91,7 +95,7 @@ Concrete classes like vehicle.Motorcycle, vehicle.Car, and vehicle.Truck impleme
 
 Below is the representation of the **vehicle.Vehicle interface and its concrete classes**.
 
-<img src="/resources/images/problems/parking-lot/vehicle-and-its-concrete-classes.png" alt="vehicle.Vehicle interface and its concrete classes" height="300" width="550" align="center">
+<img src="./images/vehicle-and-its-concrete-classes.png" alt="vehicle.Vehicle interface and its concrete classes" height="300" width="550" align="center">
 
 ⚠️ **Design Choice**
 
@@ -103,7 +107,7 @@ The parkingspot.ParkingSpot interface represents a parking spot in the parking l
 
 The UML diagram of **Parking Spot and its concrete classes** below illustrates this structure.
 
-<img src="/resources/images/problems/parking-lot/parking-spot-and-its-concrete-classes.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
+<img src="./images/parking-spot-and-its-concrete-classes.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
 
 ⚠️ **Design choice:**
 
@@ -118,7 +122,7 @@ The ParkingManager is responsible for managing the allocation and tracking of pa
 
 Here is the representation of the ParkingManager class.
 
-<img src="/resources/images/problems/parking-lot/parking-manager-class.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
+<img src="./images/parking-manager-class.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
 
 ⚠️ **Design Choice**
 
@@ -130,7 +134,7 @@ The Ticket class represents a parking ticket generated when a vehicle enters the
 
 Below is the representation of the Ticket class.
 
-<img src="/resources/images/problems/parking-lot/ticket-class.png" height="300" width="550" align="center" alt="Ticket class">
+<img src="./images/ticket-class.png" height="300" width="550" align="center" alt="Ticket class">
 
 ⚠️ **Design Choice**
 
@@ -153,7 +157,7 @@ _**Note:** To learn more about the **Strategy Pattern** and its common use cases
 
 The UML diagram below illustrates this structure.
 
-<img src="/resources/images/problems/parking-lot/fare-strategy-and-fare-calculator.png" height="300" width="550" align="center" alt="Fare strategy and fare calculator">
+<img src="./images/fare-strategy-and-fare-calculator.png" height="300" width="550" align="center" alt="Fare strategy and fare calculator">
 
 ⚠️ **Design Choice**
 
@@ -165,7 +169,7 @@ We design the ParkingLot class as the core component of the system to act as a f
 
 Below is the representation of this class.
 
-<img src="/resources/images/problems/parking-lot/parking-lot-class.png" height="300" width="550" align="center" alt="Parking lot class">
+<img src="./images/parking-lot-class.png" height="300" width="550" align="center" alt="Parking lot class">
 
 ⚠️ **Design Choice**
 
@@ -175,7 +179,7 @@ Below is the representation of this class.
 
 Take a moment to review the complete class structure and the relationships between them. This diagram demonstrates how a seemingly complex system can be constructed using simple, well-designed components working together cohesively.
 
-![](/resources/images/problems/parking-lot/class-diagram-of-parking-lot.png)
+![](./images/class-diagram-of-parking-lot.png)
 
 With this design in place, we move to implementation.
 
@@ -622,7 +626,7 @@ The parking lot system is designed to support multiple parking spot types (e.g.,
 
 To achieve this, we can introduce a new HandicappedSpot class that implements the existing parkingspot.ParkingSpot interface. This approach ensures smooth integration with the system’s spot allocation and management logic, as ParkingManager already relies on the parkingspot.ParkingSpot interface for handling spots.
 
-<img src="/resources/images/problems/parking-lot/parking-spot-with-handicapped-spot.png" height="300" width="500" align="center" alt="parkingspot.ParkingSpot with HandicappedSpot class">
+<img src="./images/parking-spot-with-handicapped-spot.png" height="300" width="500" align="center" alt="parkingspot.ParkingSpot with HandicappedSpot class">
 
 Below is the implementation of the HandicappedSpot class.
 
