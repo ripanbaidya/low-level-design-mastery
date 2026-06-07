@@ -1,6 +1,6 @@
 ![lld-banner](/resources/images/banner.png)
 
-This repository contains all the resources needed to crack **LLD interviews** at big tech companies. <br>
+This repository contains all the resources needed to crack **LLD interviews** at big tech companies.<br>
 I am keeping my **notes** and all the **resources** I create and curate from various sources organized in one place.
 
 What you will find in this **repository**
@@ -39,13 +39,19 @@ What you will find in this **repository**
 
 ## Multithreading & Concurrency
 
+Will Update soon ...
+
 ## LLD Interview Problems
 
-**_Must solve_**
+**How to approach a LLD question in interview**
 
-- [Parking Lot]()
+![](/resources/images/problems/steps-to-solve-problem.png)
+
+**Problems**
+
+- [Parking Lot](/problems/parking-lot/)
 - [Snake and Ladder]()
-- [Tic Tac Toe Game]()
+- [Tic Tac Toe Game](/problems/tic-tac-toe/)
 - [Vending Machine]()
 - [Elevator System]()
 - [ATM Machine]()
