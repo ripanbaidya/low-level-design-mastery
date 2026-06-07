@@ -4,7 +4,9 @@ In this chapter, we explore the object-oriented design of a Parking Lot system, 
 
 To build this system, we first need to clarify its requirements.
 
-![Parking Lot](./images/img1.png)
+![Parking Lot](/resources/images/problems/parking-lot/img1.png)
+
+🔥 [Click here](/problems/_solutions/src/main/java/com/solution/parking_lot/) to check the **Solution**
 
 ## How to approach the problem
 
@@ -95,19 +97,19 @@ Concrete classes like vehicle.Motorcycle, vehicle.Car, and vehicle.Truck impleme
 
 Below is the representation of the **vehicle.Vehicle interface and its concrete classes**.
 
-<img src="./images/vehicle-and-its-concrete-classes.png" alt="vehicle.Vehicle interface and its concrete classes" height="300" width="550" align="center">
+<img src="/resources/images/problems/parking-lot/vehicle-and-its-concrete-classes.png" alt="vehicle.Vehicle interface and its concrete classes" height="300" width="550" align="center">
 
 ⚠️ **Design Choice**
 
 > You might wonder: why use a getSize() method instead of a getType() method in the vehicle.Vehicle class? Using getType() would tie us to specific vehicle names like "vehicle.Motorcycle" or "vehicle.Car", forcing updates to the system’s logic every time a new type (say, "Scooter") comes along. For example, fee calculations or spot assignments would need new cases for each type. With getSize(), we abstract that away. The parking lot cares more about the size of a vehicle, such as small, medium, or large, than its exact type. A truck and a van might both be large, so they’re treated the same for parking purposes. Adding an electric scooter? Just mark its size as small, and it fits in like a motorcycle. This keeps the system lean and adaptable, focusing on space over semantics.
 
-### parkingspot.ParkingSpot
+### ParkingSpot
 
 The parkingspot.ParkingSpot interface represents a parking spot in the parking lot system. It captures spot-specific details, such as whether it’s occupied and its size. Concrete parking spot types (CompactSpot, RegularSpot, and OversizedSpot) are implemented as classes that adhere to the parkingspot.ParkingSpot interface. These classes bring the interface to life, defining spots for small, medium, and large vehicles, respectively.
 
 The UML diagram of **Parking Spot and its concrete classes** below illustrates this structure.
 
-<img src="./images/parking-spot-and-its-concrete-classes.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
+<img src="/resources/images/problems/parking-lot/parking-spot-and-its-concrete-classes.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
 
 ⚠️ **Design choice:**
 
@@ -122,7 +124,7 @@ The ParkingManager is responsible for managing the allocation and tracking of pa
 
 Here is the representation of the ParkingManager class.
 
-<img src="./images/parking-manager-class.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
+<img src="/resources/images/problems/parking-lot/parking-manager-class.png" height="300" width="550" align="center" alt="Parking lot and its concreate classes">
 
 ⚠️ **Design Choice**
 
@@ -134,7 +136,7 @@ The Ticket class represents a parking ticket generated when a vehicle enters the
 
 Below is the representation of the Ticket class.
 
-<img src="./images/ticket-class.png" height="300" width="550" align="center" alt="Ticket class">
+<img src="/resources/images/problems/parking-lot/ticket-class.png" height="300" width="550" align="center" alt="Ticket class">
 
 ⚠️ **Design Choice**
 
@@ -157,7 +159,7 @@ _**Note:** To learn more about the **Strategy Pattern** and its common use cases
 
 The UML diagram below illustrates this structure.
 
-<img src="./images/fare-strategy-and-fare-calculator.png" height="300" width="550" align="center" alt="Fare strategy and fare calculator">
+<img src="/resources/images/problems/parking-lot/fare-strategy-and-fare-calculator.png" height="300" width="550" align="center" alt="Fare strategy and fare calculator">
 
 ⚠️ **Design Choice**
 
@@ -169,7 +171,7 @@ We design the ParkingLot class as the core component of the system to act as a f
 
 Below is the representation of this class.
 
-<img src="./images/parking-lot-class.png" height="300" width="550" align="center" alt="Parking lot class">
+<img src="/resources/images/problems/parking-lot/parking-lot-class.png" height="300" width="550" align="center" alt="Parking lot class">
 
 ⚠️ **Design Choice**
 
@@ -179,7 +181,7 @@ Below is the representation of this class.
 
 Take a moment to review the complete class structure and the relationships between them. This diagram demonstrates how a seemingly complex system can be constructed using simple, well-designed components working together cohesively.
 
-![](./images/class-diagram-of-parking-lot.png)
+![](/resources/images/problems/parking-lot/class-diagram-of-parking-lot.png)
 
 With this design in place, we move to implementation.
 
@@ -626,7 +628,7 @@ The parking lot system is designed to support multiple parking spot types (e.g.,
 
 To achieve this, we can introduce a new HandicappedSpot class that implements the existing parkingspot.ParkingSpot interface. This approach ensures smooth integration with the system’s spot allocation and management logic, as ParkingManager already relies on the parkingspot.ParkingSpot interface for handling spots.
 
-<img src="./images/parking-spot-with-handicapped-spot.png" height="300" width="500" align="center" alt="parkingspot.ParkingSpot with HandicappedSpot class">
+<img src="/resources/images/problems/parking-lot/parking-spot-with-handicapped-spot.png" height="300" width="500" align="center" alt="parkingspot.ParkingSpot with HandicappedSpot class">
 
 Below is the implementation of the HandicappedSpot class.
 
