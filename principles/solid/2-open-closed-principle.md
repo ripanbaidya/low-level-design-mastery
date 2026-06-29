@@ -1,176 +1,119 @@
-# SOLID Principles
+## Open-Closed Principle (OCP)
 
-<p align="right"><b>Last Updated:</b> 25.02.2026</p>
+<p align="right">Last updated - 29.06.26</p>
 
-![ocp-banner](/resources/images/principles/solid-ocp-banner.png)
+The **Open-Closed Principle (OCP)** is the "O" in the SOLID design principles. It was introduced by Bertrand Meyer in 1988 and forms the foundation for writing code that can grow over time without breaking existing functionality.
 
-**Open-closed Principle (OCP) states:**
+The core definition is: **"Software entities (classes, modules, functions, etc.) should be open for extension, but closed for modification."**
 
-> Objects or entities should be open for extension but closed for modification.
+- **Open for extension:** You should be able to add new features or behaviors to the class easily.
 
-👉 **Open for Extension** <br>
-👉 **Closed for Modification**
+- **Closed for modification:** You should _not_ have to change the existing, already-tested code to add those new features.
 
-_This means that:_
+## The Real-World Analogy: The Wall Outlet
 
-✅ You should be able to **add new behavior** <br>
-❌ Without changing existing working code
+Think of a standard electrical wall outlet in your home.
 
-## 🧠 Why OCP Is Important
+- It is **closed for modification**: You don't rip open the wall and rewire your house every time you buy a new appliance (like a toaster or a vacuum).
 
-In real companies:
+- It is **open for extension**: The outlet provides a standard interface (the plug slots). As long as your new appliance complies with that plug interface, you can plug it in and extend your home's functionality instantly.
 
-- Features keep changing
-- New business rules come
-- Payment providers change
-- New user roles are added
+## Example: The Bad vs. The Good
 
-If every new feature forces you to edit old code → you break existing logic.
+Let's say you are building a system that calculates the area of different shapes.
 
-That’s dangerous in production systems.
+### ❌ The Bad Way (Violating OCP)
 
-## Example
-
-### ❌ Bad Example (OCP Violation)
-
-Let’s say we are building a payment system.
+In this approach, every time we add a new shape, we are forced to modify the existing `AreaCalculator` class by adding another `if/else` or `switch` case.
 
 ```java
-public class PaymentService {
+public class Rectangle {
+    public double length;
+    public double width;
+}
 
-    public void processPayment(String type) {
+public class Circle {
+    public double radius;
+}
 
-        if (type.equals("CREDIT_CARD")) {
-            System.out.println("Processing credit card payment");
+// The Violator
+public class AreaCalculator {
+    public double calculateArea(Object shape) {
+        if (shape instanceof Rectangle) {
+            Rectangle r = (Rectangle) shape;
+            return r.length * r.width;
+        } else if (shape instanceof Circle) {
+            Circle c = (Circle) shape;
+            return Math.PI * c.radius * c.radius;
         }
-        else if (type.equals("UPI")) {
-            System.out.println("Processing UPI payment");
-        }
+        // What happens when we add a Triangle?
+        // We must modify this class again!
+        return 0;
     }
 }
+
 ```
 
-❌ **Problem** - Now business says: Add **PayPal**, Add **Crypto**, Add **Net Banking** <br>
-**Every time you must:**
+#### Why this is bad:
 
-1. Modify this class
-2. Add another `else if`
-3. Retest everything
+Every time a new shape comes along, you must open `AreaCalculator.java` and modify its logic. If you make a typo, you risk breaking the area calculation for `Rectangle` and `Circle`, which were already working perfectly.
 
-🔥 **This violates OCP because:**
+### ✅ The Good Way (Adhering to OCP)
 
-- Class is NOT closed for modification
-- You must change it to add new behavior
-
----
-
-### ✅ Correct Approach (Following OCP)
-
-Instead of modifying existing class, we extend behavior.
-
-👉 **Step 1: Create an Interface**
+To fix this, we introduce an **Interface** or an **Abstract Class**. We push the responsibility of calculating the area down to the individual shapes.
 
 ```java
-public interface PaymentMethod {
-    void pay();
+// 1. Create a common interface
+public interface Shape {
+    double calculateArea();
 }
-```
 
-👉 **Step 2: Create Implementations**
+// 2. Implement the interface in concrete classes
+public class Rectangle implements Shape {
+    private double length;
+    private double width;
 
-```java
-public class CreditCardPayment implements PaymentMethod {
-    public void pay() {
-        System.out.println("Processing credit card payment");
+    public Rectangle(double length, double width) {
+        this.length = length;
+        this.width = width;
+    }
+
+    @Override
+    public double calculateArea() {
+        return length * width;
     }
 }
-```
 
-```java
-public class UpiPayment implements PaymentMethod {
-    public void pay() {
-        System.out.println("Processing UPI payment");
+public class Circle implements Shape {
+    private double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public double calculateArea() {
+        return Math.PI * radius * radius;
     }
 }
-```
 
-👉 **Step 3: Modify PaymentService (Only Once)**
-
-```java
-public class PaymentService {
-
-    public void processPayment(PaymentMethod paymentMethod) {
-        paymentMethod.pay();
+// 3. The Calculator is now CLOSED to modification
+public class AreaCalculator {
+    public double calculateArea(Shape shape) {
+        return shape.calculateArea(); // Polymorphism at work
     }
 }
+
 ```
 
-👉 **Step 4: Usage**
+#### Why this is brilliant:
 
-```java
-PaymentService service = new PaymentService();
+If you want to add a `Triangle` tomorrow, you simply create a new class `Triangle implements Shape` and write its area logic there. **You don't touch a single line of existing code** in `AreaCalculator`, `Rectangle`, or `Circle`. Your system is completely open to extension but closed to modification.
 
-service.processPayment(new CreditCardPayment());
-service.processPayment(new UpiPayment());
-```
+## Key Benefits of OCP
 
-👉 **Now What Happens If the requirement comes to add new payment method?**
+- **Zero Regression Risk:** Because you aren't changing old code, you drastically lower the risk of introducing new bugs into existing features.
+- **Loose Coupling:** Components interact through abstractions (interfaces) rather than concrete implementations.
+- **Plug-and-Play Architecture:** It allows frameworks and plugins to work smoothly. You can inject new behaviors dynamically without altering the core engine.
 
-> We can add new class without modifying existing class by extending the PaymentMethod interface. 
-
-❇️ Let's say, we want to add **PayPal Payment** method.
-
-```java
-public class PaypalPayment implements PaymentMethod {
-    public void pay() {
-        System.out.println("Processing PayPal payment");
-    }
-}
-``` 
-
-👉 We DO NOT modify `PaymentService`, Rather we just **extend** system.
-
-🔥 **_That is OCP._**
-
-
-## 🧪 Interview Deep Insight
-
-🗣️ **Interviewer may ask:** **“How does OCP relate to Strategy Pattern?”** <br>
-🧑‍💻 **Answer**: **OCP** is a principle and **Strategy** is a design pattern that helps implement **OCP**
-
-## ⚡ Important Rule
-
-If you see:
-
-```java
-if(type == X)
-else if(type == Y)
-else if(type == Z)
-```
-
-⚠️ 80% chance **OCP** is being violated.
-
-## 📊 Before vs After
-
-| Without OCP    | With OCP       |
-| -------------- | -------------- |
-| if-else chain  | Polymorphism   |
-| Hard to scale  | Easy to extend |
-| Risky changes  | Stable core    |
-| Tight coupling | Loose coupling |
-
-
-## Conclusion 🎯 
-
-Open Closed Principle means:
-
-✔ Open for extension <br>
-✔ Closed for modification <br>
-✔ Use interfaces <br>
-✔ Use polymorphism <br>
-✔ Avoid modifying stable code <br>
-✔ Extend behavior instead <br>
-
-## Resources 🔗
-
-🔗 https://www.digitalocean.com/community/conceptual-articles/s-o-l-i-d-the-first-five-principles-of-object-oriented-design#open-closed-principle
+## References
