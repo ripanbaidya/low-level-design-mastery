@@ -1,200 +1,115 @@
-![behavioural-design-pattern](/resources/images/patterns/behavioural/banner.png)
+## Behavioral Design Pattern
 
-<p align="right"><b>Last Updated:</b> 25.02.2026</p>
+<p align="right">Last updated - 29.06.26</p>
 
-## Introduction 🔥
+## Introduction
 
-The term **Behavioral Design Patterns** comes from the famous GoF book **Design Patterns: Elements of Reusable Object-Oriented Software**
+The concept of **Behavioral Design Patterns** originates from the foundational Gang of Four (GoF) book, _Design Patterns: Elements of Reusable Object-Oriented Software_. While creational patterns manage object instantiation and structural patterns dictate component composition, behavioral patterns are entirely concerned with the mechanics of interaction.
 
-These patterns focus on:
+> **Core Philosophy:** Behavioral design patterns focus on how objects communicate, how responsibilities are distributed, and how system behavior can be altered dynamically at runtime.
 
-> **How objects communicate, assign responsibilities, and manage behavior dynamically.**
+Implementing these patterns allows you to:
 
-- Interaction between objects
-- Decoupling responsibilities
-- Reducing conditional complexity
-- Runtime behavior changes
+- Establish clear, flexible communication channels between objects.
+- Decouple the sender of a request from its receiver.
+- Eliminate complex, nested conditional logic (`if-else` or `switch` blocks).
+- Adapt application behavior dynamically based on runtime context or state.
 
-Unlike:
+## When to Use vs. Avoid
 
-- **Creational** → how objects are created
-- **Structural** → how objects are composed
-- **Behavioral** → how objects behave & communicate
+### Use When
 
-## 🧭 When to Use / Avoid
+- You need to coordinate complex communication between a diverse set of objects.
+- Component algorithms or behaviors must be selected and swapped dynamically at runtime.
+- Your codebase is bogged down by massive conditional structures checking state or types.
+- You need to support rollback operations (undo/redo functionality).
+- You are building event-driven architectures or pipeline processing systems.
 
-### ✅ Use When
+### Avoid When
 
-- Multiple objects must communicate
-- You need runtime behavior switching
-- You want to remove large `if-else` blocks
-- You need undo/redo
-- You want event-driven architecture
-- You process requests in pipelines
-- Behavior depends on state
+- The system is straightforward and your operational flows are predictable and stable.
+- Introducing an abstraction layer adds more architectural complexity than the problem warrants.
+- Splitting behaviors causes "class explosion," making the codebase fragmented and harder to read.
 
-### ❌ Avoid When
+## The 11 Behavioral Design Patterns
 
-- System is small/simple
-- Behavior is stable
-- It adds unnecessary abstraction
-- It causes too many classes
-- It harms readability
+### 1. Strategy Pattern
 
-## 📦 Types of Behavioral Patterns (11 Total)
+- **Core Idea:** Defines a family of interchangeable algorithms, encapsulates each one, and makes them independent of the clients that use them.
+- **Key Insight:** It allows you to adhere to the Open-Closed Principle (OCP) by adding new algorithms without altering the context class, effectively replacing runtime conditional blocks.
 
-### 1️⃣ Strategy Pattern
+### 2. Observer Pattern
 
-**📌 Idea:** Encapsulate interchangeable algorithms.
+- **Core Idea:** Establishes a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+- **Real-World Analogy:** A publisher-subscriber framework, such as a content platform notifying subscribers of a new upload, or real-time UI components listening to stock price changes. It is heavily utilized in event-driven setups and framework ecosystems like Spring Events.
 
-**🔥 Interview Insight:**
+### 3. Command Pattern
 
-Removes conditional complexity. <br>
-Follows OCP.
+- **Core Idea:** Encapsulates a request or action as a standalone object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations.
+- **Real-World Analogy:** A home automation remote control button. The button element triggers a specific execution object without needing to know the technical wiring of the target appliance.
 
-### 2️⃣ Observer Pattern
+### 4. Chain of Responsibility Pattern
 
-**📌 Idea:** One-to-many dependency. Observers auto-notified.
+- **Core Idea:** Avoids coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. It strings the receiving objects together into a pipeline and passes the request along the chain until an object handles it.
+- **Real-World Analogy:** HTTP request middleware execution paths, such as Java Servlet Filters or a Spring Security filter pipeline handling Authentication $\rightarrow$ Logging $\rightarrow$ Validation.
 
-**Example:**
+### 5. State Pattern
 
-- YouTube subscribers notified of new video
-- Stock price update listeners
+- **Core Idea:** Allows an object to alter its behavior when its internal state changes, making the object appear as though it changed its class type.
+- **Real-World Analogy:** An automated banking machine (ATM) shifting its behavioral context across distinct operational states: `NoCard` $\rightarrow$ `HasCard` $\rightarrow$ `PinVerified`.
 
-Used heavily in:
+### 6. Template Method Pattern
 
-- Event-driven systems
-- Spring events
-- UI frameworks
+- **Core Idea:** Defines the skeleton of an algorithm in an operation, deferring some steps to subclasses. It lets subclasses redefine certain steps of an algorithm without changing the algorithm's overarching structure.
+- **Key Insight:** Highly prevalent in abstract application layers, such as Spring's `JdbcTemplate`, where the structural steps (opening connections, handling transactions) are locked, but the execution details are customizable.
 
-### 3️⃣ Command Pattern
+### 7. Iterator Pattern
 
-**📌 Idea:** Encapsulate a request as an object.
+- **Core Idea:** Provides a way to access the elements of an aggregate object sequentially without exposing its underlying structural representation.
+- **Java Integration:** Natively integrated directly into the Java Collections Framework via the standard interface utility:
 
-**Example:** Remote control button: Button → Command → Light On
+    ```java
+    Iterator<String> iterator = list.iterator();
+    ```
 
-**Useful for:**
+### 8. Mediator Pattern
 
-- Undo/Redo
-- Task queues
-- Job scheduling
+- **Core Idea:** Defines an object that encapsulates how a set of objects interact. It promotes loose coupling by keeping objects from referring to each other explicitly, letting you vary their interaction independently.
+- **Real-World Analogy:** An airport air traffic control tower coordinating plane movements rather than requiring every aircraft to communicate directly with every other aircraft.
 
-### 4️⃣ Chain of Responsibility
+### 9. Memento Pattern
 
-**📌 Idea:** Pass request through chain until handled.
+- **Core Idea:** Without violating encapsulation, captures and externalizes an object's internal state so that the object can be restored to this state later.
+- **Common Use Cases:** Designing history states, snapshots, or deep rollback actions inside rich client text editors or transactional processing units.
 
-**Example:** Backend request pipeline <br>
-Auth → Logging → Validation → Controller
+### 10. Visitor Pattern
 
-**Very common in:**
+- **Core Idea:** Represents an operation to be performed on the elements of an object structure. It lets you define a new operation without changing the classes of the elements on which it operates.
+- **Real-World Analogy:** Applying shifting external tax assessment operations dynamically over an inventory list of stable, unchanging product types like food, clothing, and electronics.
 
-- Servlet Filters
-- Spring Security filter chain
+### 11. Interpreter Pattern
 
-### 5️⃣ State Pattern
+- **Core Idea:** Given a language, defines a representation for its grammar along with an interpreter that uses the representation to evaluate sentences in the language.
+- **Common Use Cases:** Writing internal rule evaluation engines, custom mathematical formula parsers, or SQL query evaluation utilities.
 
-**📌 Idea:** Object changes behavior based on internal state.
+## Architectural Reference Matrix
 
-**Example:**
-
-ATM states: <br>
-NoCard → HasCard → PinVerified
-
-Instead of big conditionals, behavior delegated to state objects.
-
-### 5️⃣ State Pattern
-
-**📌 Idea:** Object changes behavior based on internal state.
-
-**Example:**
-
-ATM states: <br>
-NoCard → HasCard → PinVerified
-
-Instead of big conditionals, behavior delegated to state objects.
-
-### 6️⃣ Template Method Pattern
-
-**📌 Idea:** Define algorithm skeleton in parent class.
-
-**Example:** <br>
-Define algorithm skeleton in parent class. <br>
-Subclasses override certain steps.
-
-**Used in:**
-
-- Spring’s `JdbcTemplate`
-- Fixed workflow systems
-
-### 7️⃣ Iterator Pattern
-
-**📌 Idea:** Access collection sequentially without exposing internals.
-
-**Example:**
-
-```java
-Iterator<String> it = list.iterator();
-```
-
-Built-in in Java Collections Framework.
-
-### 8️⃣ Mediator Pattern
-
-**📌 Idea:** Central object manages communication.
-
-**Example:**
-
-Air traffic controller coordinates planes. <br>
-Reduces tight coupling between components.
-
-### 9️⃣ Memento Pattern
-
-**📌 Idea:** Capture & restore object state.
-
-**Example:** <br>
-Undo in text editor.
-
-### 🔟 Visitor Pattern
-
-**📌 Idea:** Add new operations without modifying object structure.
-
-**Example:** <br>
-Different tax rules for:
-
-- Food
-- Electronics
-- Clothing
-
-Useful when structure is stable but operations change.
-
-## 1️⃣1️⃣ Interpreter Pattern
-
-**📌 Idea:** Define grammar + interpreter for language.
-
-**Example:** <br>
-Mathematical expression evaluator.
-
-**Used in:**
-
-- Rule engines
-- Query parsers
-
-## 🎯 Quick Comparison Table
-
-| Pattern     | Solves What?                |
-| ----------- | --------------------------- |
-| Strategy    | Runtime algorithm switching |
-| Observer    | Event notification          |
-| Command     | Encapsulated request        |
-| Chain       | Processing pipeline         |
-| State       | Behavior depends on state   |
-| Template    | Fixed workflow              |
-| Iterator    | Collection traversal        |
-| Mediator    | Centralized communication   |
-| Memento     | Undo / restore state        |
-| Visitor     | Add new operations          |
-| Interpreter | Custom language processing  |
-
-## Resources 📚
-
-🔗 https://codewitharyan.com/tech-blogs/behavioral-design-pattern <br>
+| Pattern                     | Primary Problem Solved                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Strategy**                | Needs to swap interchangeable algorithms at runtime.                                           |
+| **Observer**                | Needs to broadcast state changes to unknown, dynamic listeners.                                |
+| **Command**                 | Needs to turn operations into objects to support scheduling, queuing, or rollbacks.            |
+| **Chain of Responsibility** | Needs to pass a request through an ordered sequence of decoupled processors.                   |
+| **State**                   | Needs to change object behavior based completely on its shifting internal values.              |
+| **Template Method**         | Needs to lock down an algorithmic workflow skeleton while allowing step customization.         |
+| **Iterator**                | Needs to step through collection elements without exposing its data layout.                    |
+| **Mediator**                | Needs to reduce chaotic, complex inter-dependencies between multiple classes.                  |
+| **Memento**                 | Needs to capture, track, and restore historical snapshots of an object safely.                 |
+| **Visitor**                 | Needs to add processing logic to an existing structural type without altering its source code. |
+| **Interpreter**             | Needs to interpret and execute processing routines for a custom language grammar.              |
+
+> 💡 Important - Strategy, Observer, State
+
+## Resources
+
+- https://www.google.com/search?q=https://refactoring.guru/design-patterns/behavioral-patterns
