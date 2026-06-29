@@ -1,142 +1,78 @@
-![structural-design-pattern](/resources/images/patterns/structural/banner.png)
+## Structural Design Pattern
 
-<p align="right"><b>Last Updated:</b> 25.02.2026</p>
+<p align="right">Last updated - 29.06.2026</p>
 
-## Introduction 🏗️
+## Introduction
 
-Structural Design Patterns focus on:
+The term **Structural Design Patterns** stems from the classic Gang of Four (GoF) reference manual, _Design Patterns: Elements of Reusable Object-Oriented Software_. While creational patterns manage the nuances of object instantiation and behavioral patterns dictate how objects interact, structural patterns target how components are physically assembled.
 
-> **How classes and objects are composed to form larger structures while keeping the system flexible and efficient.**
+> **Core Philosophy:** Structural design patterns focus on how classes and objects are composed to form larger, more complex structures while ensuring the system remains flexible, efficient, and scalable.
 
-If:
+Implementing these patterns allows you to:
 
-- **Creational** → How objects are created
-- **Behavioral** → How objects communicate
-- **Structural** → How objects are arranged & connected
+- Assemble large object hierarchies using composition rather than rigid, deep inheritance layers.
+- Bridge structural gaps between incompatible legacy systems and modern APIs.
+- Extend component features dynamically at runtime without modifying source code.
+- Optimize system memory footprint by sharing common object details.
 
-These patterns help you:
+## The 7 Structural Design Patterns
 
-- Reduce tight coupling
-- Improve flexibility
-- Make systems extensible
-- Wrap legacy code cleanly
+### 1. Adapter Pattern
 
-They are defined in **📘 Design Patterns: Elements of Reusable Object-Oriented Software**
+- **Strategic Purpose:** Converts the interface of a class into another interface that the client expects. It enables classes with incompatible interfaces to collaborate seamlessly.
+- **Real-World Analogy:** A standard travel wall adapter that acts as a middleman, enabling a foreign 110V plug to draw power safely from a domestic 220V power outlet.
+- **Backend Application:** Wrapping an outdated, legacy library inside a clean, modern interface without modifying the vendor's source code.
 
-## 📦 Types of Structural Design Patterns (7 Total)
+### 2. Bridge Pattern
 
-### 1️⃣ Adapter Pattern
+- **Strategic Purpose:** Decouples an abstraction from its implementation details so that the two can vary completely independently.
+- **The Problem It Solves:** Prevents "inheritance explosion". Instead of generating a distinct subclass for every combination (e.g., `RedCircle`, `BlueCircle`, `RedSquare`, `BlueSquare`), you decouple `Shape` from `Color` via composition.
 
-**📌 Purpose:** Convert one interface into another that clients expect.
+### 3. Composite Pattern
 
-**👉 Example:** Mobile charger adapter:
+- **Strategic Purpose:** Composes objects into tree structures to represent part-whole hierarchies, allowing clients to treat individual objects and nested groups uniformly.
+- **Real-World Analogy:** An operating system file directory. A directory can hold individual files (leaf nodes) as well as subdirectories (composite nodes), and both respond to the same commands like `getSize()` or `delete()`.
 
-- Socket provides 220V
-- Phone needs 5V
-- Adapter converts it
+### 4. Decorator Pattern
 
-**🔥 Backend Use:** Integrating third-party libraries without modifying them.
+- **Strategic Purpose:** Attaches additional responsibilities and behaviors to an object dynamically at runtime. It offers a flexible alternative to subclassing for extending functionality.
+- **Real-World Analogy:** Ordering a basic black coffee and layered modifiers dynamically (e.g., adding milk, adding sugar, adding foam) without creating unique classes for every conceivable coffee combination.
 
-### 2️⃣ Bridge Pattern
+### 5. Facade Pattern
 
-**📌 Purpose:** Separate abstraction from implementation.
+- **Strategic Purpose:** Provides a simplified, high-level interface to a complex and larger subsystem of classes.
+- **Real-World Analogy:** A single "Watch Movie" button on a smart remote that automatically switches on the television, configures the audio amplifier, boots the media player, and dims the smart lights.
+- **Backend Application:** Designing an enterprise service layer class that coordinates underlying communication between multiple repositories, mail systems, and external payment APIs.
 
-**👉 Example:** Instead of inheritance explosion:
+### 6. Flyweight Pattern
 
-`CircleRed`, `CircleBlue`, `SquareRed`, `SquareBlue`
+- **Strategic Purpose:** Minimizes application memory usage by sharing common, unchanging data across a massive quantity of similar objects.
+- **Real-World Analogy:** A digital text engine rendering a book. Instead of instantiating unique font style records for thousands of individual characters, each character holds a coordinate pointer back to a single shared style object.
 
-Use composition.
+### 7. Proxy Pattern
 
-**🔥 Backend Use:** You want independent variation of abstraction & implementation.
+- **Strategic Purpose:** Provides a surrogate, placeholder, or wrapper object to control access to another target object.
+- **Core Variations:**
+- **Virtual Proxy:** Delays expensive initialization until the object is explicitly used (lazy loading).
+- **Protection Proxy:** Intercepts invocations to enforce security policies and authorization permissions.
+- **Remote Proxy:** Manages structural messaging details between an application and remote network servers.
 
-### 3️⃣ Composite Pattern
+- **Backend Application:** Core framework interceptors, such as Spring AOP aspect proxies wrapping database transactions around services.
 
-**📌 Purpose:** Treat individual objects and groups uniformly.
+## Architectural Reference Matrix
 
-**👉 Example:** File system:
+| Pattern       | Architectural Problem Solved                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| **Adapter**   | Unifies two incompatible, disparate interfaces without altering vendor code.                    |
+| **Bridge**    | Isolates structural variations of an interface from its independent implementation strategy.    |
+| **Composite** | Handles nested, tree-like hierarchies uniformly using a shared component type.                  |
+| **Decorator** | Layer additional features onto concrete objects at runtime without using subclassing.           |
+| **Facade**    | Conceals a messy, complex collection of backend classes behind a single simple entry point.     |
+| **Flyweight** | Drastically cuts RAM usage when generating thousands of identical structural entities.          |
+| **Proxy**     | Intercepts operations to add access controls, lazy evaluation logic, or transaction boundaries. |
 
-- File
-- Folder (contains files & folders)
+> Important - Decorator, Facade
 
-Folder contains list of Components.
+## Resources
 
-**🔥 Backend Use:** Menu systems, hierarchical data, tree structures.
-
-### 4️⃣ Decorator Pattern
-
-**📌 Purpose:** Add new behavior dynamically without modifying class.
-
-**👉 Example:** Coffee:
-
-- Basic coffee
-- Add milk
-- Add sugar
-- Add chocolate
-
-Instead of subclass explosion.
-
-### 5️⃣ Facade Pattern
-
-**📌 Purpose:** Provide simple interface to complex subsystem.
-
-**👉 Example:** Home theater system:
-Instead of:
-
-- Turn on DVD
-- Turn on amplifier
-- Set input
-- Adjust sound
-
-You call:
-
-```java
-homeTheater.watchMovie();
-```
-
-**🔥 Backend Use:** Service layer acting as facade over multiple services.
-
-### 6️⃣ Flyweight Pattern
-
-**📌 Purpose:** Reduce memory usage by sharing common objects.
-
-**👉 Example:** Text editor:
-
-- Characters share font objects
-
-Instead of creating thousands of identical objects.
-
-**Used when:**
-
-- Many similar objects
-- Memory optimization required
-
-### 7️⃣ Proxy Pattern
-
-**📌 Purpose:** Control access to an object. <br>
-**⭐️ Types:**
-
-- Virtual Proxy (lazy loading)
-- Protection Proxy (security)
-- Remote Proxy (RMI)
-
-**👉 Example:** Lazy loading image: Object created only when needed.
-
-**🔥 Backend Use:** Spring AOP uses proxy heavily.
-
-## 🎯 Quick Comparison Table
-
-| Pattern   | Solves What?                |
-| --------- | --------------------------- |
-| Adapter   | Interface mismatch          |
-| Bridge    | Avoid inheritance explosion |
-| Composite | Tree structures             |
-| Decorator | Add behavior dynamically    |
-| Facade    | Simplify complex subsystem  |
-| Flyweight | Reduce memory usage         |
-| Proxy     | Control access              |
-
-## Conclusion ❇️
-
-## Resources 📚
-
-🔗 https://codewitharyan.com/tech-blogs/structural-design-pattern
+- https://www.google.com/search?q=https://refactoring.guru/design-patterns/structural-patterns
