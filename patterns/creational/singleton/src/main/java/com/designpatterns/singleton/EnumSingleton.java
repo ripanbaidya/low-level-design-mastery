@@ -2,9 +2,10 @@ package com.designpatterns.singleton;
 
 public enum EnumSingleton {
 
-  INSTANCE;
+    // JVM guarantees a single instance, inherently thread-safe and safe from attacks
+    INSTANCE;
 
-  void doSomething() {
-    System.out.println("Hello World");
-  }
+    public void executeBusinessLogic() {
+        System.out.println("Executing system operations securely.");
+    }
 }

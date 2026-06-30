@@ -2,16 +2,16 @@ package com.designpatterns.singleton;
 
 public class ThreadSafeSingleton {
 
-  private static ThreadSafeSingleton instance = null;
+    private static ThreadSafeSingleton instance = null;
 
-  // Prevent Instantiation
-  private ThreadSafeSingleton() {
-  }
-
-  public static synchronized ThreadSafeSingleton getInstance() {
-    if (instance == null) {
-      instance = new ThreadSafeSingleton();
+    private ThreadSafeSingleton() {
     }
-    return instance;
-  }
+
+    // The 'synchronized' keyword prevents concurrent access but penalizes performance
+    public static synchronized ThreadSafeSingleton getInstance() {
+        if (instance == null) {
+            instance = new ThreadSafeSingleton();
+        }
+        return instance;
+    }
 }

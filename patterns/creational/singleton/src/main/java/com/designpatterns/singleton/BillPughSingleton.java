@@ -2,16 +2,15 @@ package com.designpatterns.singleton;
 
 public class BillPughSingleton {
 
-  // Prevent Instantiation
-  private BillPughSingleton() {
-  }
+    private BillPughSingleton() {
+    }
 
-  // static inner class
-  private static class Helper {
-    private static final BillPughSingleton INSTANCE = new BillPughSingleton();
-  }
+    // The inner static class is not loaded into memory until getInstance() is invoked
+    private static class Helper {
+        private static final BillPughSingleton INSTANCE = new BillPughSingleton();
+    }
 
-  public static BillPughSingleton getInstance() {
-    return Helper.INSTANCE;
-  }
+    public static BillPughSingleton getInstance() {
+        return Helper.INSTANCE;
+    }
 }
