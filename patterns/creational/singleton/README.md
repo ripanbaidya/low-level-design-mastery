@@ -1,328 +1,311 @@
-# Singleton Pattern
+## Singleton Design Pattern
 
-<p align="right"><b>Last Updated: 25.02.2026</b></p>
+<p align="right">Last update - 29.06.2026</p>
 
-## 🔥 Introduction
+The Singleton pattern is one of the most fundamental creational design patterns in software engineering. This guide provides an exhaustive breakdown of the pattern, moving from basic concepts to production-grade implementations, edge cases, and architectural trade-offs.
 
-Singleton is a **Creational Design** Pattern that ensures:
+## Introduction
 
-- Only one instance of a class exists
-- Provides a global access point to that instance
-- It controls object creation.
+The Singleton design pattern ensures that a class has only one instance throughout the application's lifecycle and provides a global point of access to that instance.
 
-In many applications, we need **exactly one instance** of a class throughout the entire lifecycle of the application.
+In enterprise applications, managing resource-intensive components demands strict control over object instantiation. Allowing unrestricted creation of instances for shared resources can introduce major system vulnerabilities, including:
 
-**Creating multiple instances may lead to:**
+- **Resource Exhaustion:** Unnecessary memory consumption and thread starvation.
+- **Data Inconsistency:** Multiple instances writing conflicting states to a single destination.
+- **Connection Overload:** Spawning duplicate, unmanaged database or socket connections.
 
-- ⚠️ Inconsistent state
-- 🔥 Resource conflicts
-- 🧠 Unnecessary memory usage
-- 🔌 Duplicate database connections
+## The Problem
 
-## 📌 Problem
+Consider a backend application that reads its configuration settings from a central file. Multiple distributed services within the application require real-time access to these configuration parameters.
 
-Imagine, You are building a **backend system** where:
+If each service instantiates its own configuration reader object:
 
-📂 The application reads configuration from a file <br>
-🔄 Multiple services need access to the same configuration
+1. The file system is queried repeatedly, creating I/O bottlenecks.
+2. Memory usage escalates linearly with the number of services.
+3. If a configuration parameter changes dynamically, different services will hold disparate states, leading to unpredictable system behavior.
 
-Now think about what happens if **every service creates its own configuration object**:
+### System Requirements
 
-- 📖 The file will be read multiple times
-- 💾 Memory will be wasted
-- ❌ Application state may become inconsistent
+To resolve this, we require a design that guarantees:
 
-**That’s inefficient and risky.**
+- A single, definitive instance of the configuration object.
+- A controlled, globally accessible entry point.
+- Thread safety under high-concurrency environments.
 
-**_🚨 We Need_**
+## The Solution
 
-- ✅ Only **one configuration object**
-- 🌍 Accessible globally
-- 🧵 Thread-safe
-- ⚡ Efficient and optimized
+The Singleton pattern addresses these challenges by making the class itself responsible for managing its sole instance. It encapsulates the instantiation logic, shielding the rest of the application from manual lifecycle management.
 
-## Solution 💡
+### Core Structural Components
 
-The Solution to the above problem is **Singleton Design Pattern**,
-It **ensures** that:
+| Component                | Responsibility                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| **Singleton Class**      | Manages its own unique instance and internal state.                                          |
+| **Private Constructor**  | Restricts external compilation units from using the `new` operator.                          |
+| **Static Access Method** | Acts as the global gateway, managing lazy or eager instantiation and returning the instance. |
 
-- 🏗 Only one instance of a class is created
-- 🔐 Controlled access to that instance
-- 🌎 A global access point
-- 🧵 Thread safety (when implemented properly)
+## UML Representation
 
-## Core Components ⚙️
+```
++------------------------------------------+
+|                 Singleton                |
++------------------------------------------+
+| - instance : Singleton                   |
++------------------------------------------+
+| - Singleton()                            |
+| + getInstance() : Singleton              |
++------------------------------------------+
+```
 
-| Component            | Responsibility                  |
-| -------------------- | ------------------------------- |
-| Singleton Class      | Holds the single instance       |
-| Private Constructor  | Prevents external instantiation |
-| Static Access Method | Returns the single instance     |
+> **The Structural Core:** A private constructor to block instantiation, a private static variable to hold the reference, and a public static method to handle access control.
 
-## UML
+## Implementation Strategies in Java
 
-![singleton-uml](/resources/images/patterns/creational/singleton-uml.png)
+There are several ways to implement the Singleton pattern, each with distinct trade-offs regarding memory efficiency, thread safety, and performance.
 
-> 🧠 **Mental model**: **Private constructor + static instance + static accessor**
+### 1. Eager Initialization
 
-## Code 🧑‍💻
-
-### 1️⃣ Eager Initialization
+The instance is created at the time of class loading. This is the simplest approach but can lead to resource waste if the instance is never utilized by the application.
 
 ```java
-package com.designpatterns.singleton;
-
 public class EagerSingleton {
 
-  private static final EagerSingleton INSTANCE = new EagerSingleton();
+    // The instance is initialized when the class loader loads this class into memory
+    private static final EagerSingleton INSTANCE = new EagerSingleton();
 
-  // Prevent Instantiation
-  private EagerSingleton() {
-  }
+    // Private constructor blocks external instantiation
+    private EagerSingleton() {
+    }
 
-  public static EagerSingleton getInstance() {
-    return INSTANCE;
-  }
+    // Global access point returning the pre-created instance
+    public static EagerSingleton getInstance() {
+        return INSTANCE;
+    }
 }
 
 ```
 
-### Lazy Initialization (NOT Thread-Safe ❌)
+### 2. Lazy Initialization (Non-Thread-Safe)
+
+The instance is created only when it is requested for the first time. While resource-efficient, it fails in multi-threaded environments.
 
 ```java
-package com.designpatterns.singleton;
-
 public class LazySingleton {
 
-  private static LazySingleton instance = null;
+    private static LazySingleton instance = null;
 
-  // Prevent Instantiation
-  private LazySingleton() {
-  }
-
-  public static LazySingleton getInstance() {
-    if (instance == null) {
-      instance = new LazySingleton();
+    private LazySingleton() {
     }
-    return instance;
-  }
+
+    public static LazySingleton getInstance() {
+        // Condition is vulnerable to race conditions if multiple threads enter simultaneously
+        if (instance == null) {
+            instance = new LazySingleton();
+        }
+        return instance;
+    }
 }
+
 ```
 
-❌ Breaks in multithreaded environment
+### 3. Thread-Safe Singleton (Synchronized Method)
 
-### 3 Thread-Safe (Synchronized Method)
+By synchronizing the access method, we ensure thread safety. However, this introduces severe performance overhead, as every subsequent call incurs synchronization costs even after the instance is initialized.
 
 ```java
-package com.designpatterns.singleton;
-
 public class ThreadSafeSingleton {
 
-  private static ThreadSafeSingleton instance = null;
+    private static ThreadSafeSingleton instance = null;
 
-  // Prevent Instantiation
-  private ThreadSafeSingleton() {
-  }
-
-  public static synchronized ThreadSafeSingleton getInstance() {
-    if (instance == null) {
-      instance = new ThreadSafeSingleton();
+    private ThreadSafeSingleton() {
     }
-    return instance;
-  }
+
+    // The 'synchronized' keyword prevents concurrent access but penalizes performance
+    public static synchronized ThreadSafeSingleton getInstance() {
+        if (instance == null) {
+            instance = new ThreadSafeSingleton();
+        }
+        return instance;
+    }
 }
 
 ```
 
-✅ Thread-safe
-❌ Performance overhead
+### 4. Double-Checked Locking (Optimized Concurrency)
 
-### 4 Double-Checked Locking (Best Interview Choice ⭐)
+This approach optimizes performance by applying synchronization only during the initial creation phase.
 
 ```java
-package com.designpatterns.singleton;
-
 public class DoubleCheckedLockingSingleton {
 
-  // Volatile keyword is used for ensuring visibility of instance across threads
-  private static volatile DoubleCheckedLockingSingleton instance = null;
+    // The 'volatile' keyword ensures changes to this variable are immediately visible across threads
+    // and prevents local instruction reordering during optimization phases
+    private static volatile DoubleCheckedLockingSingleton instance = null;
 
-  // Prevent Instantiation
-  private DoubleCheckedLockingSingleton() {
-  }
-
-  public static DoubleCheckedLockingSingleton getInstance() {
-    // First check (Non Synchronized) for Performance optimization
-    if (instance == null) {
-      // Synchronized on class object
-      synchronized (DoubleCheckedLockingSingleton.class) {
-        // Second check (Synchronized) for thread safety
-        if (instance == null) {
-          instance = new DoubleCheckedLockingSingleton();
-        }
-      }
+    private DoubleCheckedLockingSingleton() {
     }
-    return instance;
-  }
+
+    public static DoubleCheckedLockingSingleton getInstance() {
+        // First check: Executed without locking to optimize execution flow
+        if (instance == null) {
+            // Synchronize on the class monitor block to manage contention
+            synchronized (DoubleCheckedLockingSingleton.class) {
+                // Second check: Verifies no other thread initialized the instance while waiting for the lock
+                if (instance == null) {
+                    instance = new DoubleCheckedLockingSingleton();
+                }
+            }
+        }
+        return instance;
+    }
 }
+
 ```
 
-✅ Thread-safe
-✅ Lazy
-✅ High performance
+### 5. Bill Pugh Singleton (Initialization-on-Demand Holder)
 
-📌 `volatile` prevents instruction reordering
-
-### 5. Bill Pugh (Initialization-on-Demand Holder)
+Widely considered the cleanest standard approach in Java, it leverages the JVM’s native class-loading mechanics to guarantee both lazy loading and thread safety without explicit synchronization overhead.
 
 ```java
-package com.designpatterns.singleton;
-
 public class BillPughSingleton {
 
-  // Prevent Instantiation
-  private BillPughSingleton() {
-  }
+    private BillPughSingleton() {
+    }
 
-  // static inner class
-  private static class Helper {
-    private static final BillPughSingleton INSTANCE = new BillPughSingleton();
-  }
+    // The inner static class is not loaded into memory until getInstance() is invoked
+    private static class SingletonHolder {
+        private static final BillPughSingleton INSTANCE = new BillPughSingleton();
+    }
 
-  public static BillPughSingleton getInstance() {
-    return Helper.INSTANCE;
-  }
+    public static BillPughSingleton getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 }
+
 ```
 
-✅ Best balance
-✅ Lazy + Thread-safe
-✅ No synchronization
+### 6. Enum Singleton (Production-Grade Security)
 
-### 6. Enum Singleton (Safest ⭐⭐)
+Using a single-element enum provides built-in protection against serialization and reflection attacks out of the box.
 
 ```java
-package com.designpatterns.singleton;
-
 public enum EnumSingleton {
-  
-  INSTANCE;
-  
-  void doSomething() {
-    System.out.println("Hello World");
-  }
+
+    // JVM guarantees a single instance, inherently thread-safe and safe from attacks
+    INSTANCE;
+
+    public void executeBusinessLogic() {
+        System.out.println("Executing system operations securely.");
+    }
 }
 
 ```
 
-✅ Thread-safe
-✅ Serialization safe
-✅ Reflection safe
-❌ Less flexible
+## Vulnerabilities and Defenses
+
+Standard implementations can be bypassed using advanced language features like **Reflection, Serialization, and Cloning**. Understanding how to defend against these vulnerabilities is critical for framework design and interview preparation.
+
+### 1. Defending Against Reflection Attacks
+
+Reflection can force a private constructor to become public, allowing malicious or accidental duplicate instantiation.
+
+```java
+// Vulnerability Example
+Constructor<BillPughSingleton> constructor = 
+    BillPughSingleton.class.getDeclaredConstructor();
+constructor.setAccessible(true);
+BillPughSingleton reflectionInstance = 
+    constructor.newInstance(); // Second instance created
+
+```
+
+**The Defense:** Throw an exception from within the constructor if an instance already exists.
+
+```java
+private BillPughSingleton() {
+    if (SingletonHolder.INSTANCE != null) {
+        throw new IllegalStateException("Instance already initialized. Use getInstance().");
+    }
+}
+
+```
+
+### 2. Defending Against Serialization Attacks
+
+When a Singleton is serialized and subsequently deserialized, the JVM constructs a completely new instance by default.
+
+**The Defense:** Implement the `readResolve()` method. This hook instructs the JVM to return the existing instance instead of creating a new one.
+
+```java
+import java.io.Serializable;
+
+public class SerializableSingleton implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private SerializableSingleton() {}
+
+    private static class Holder {
+        private static final SerializableSingleton INSTANCE = new SerializableSingleton();
+    }
+
+    public static SerializableSingleton getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    // Replaces the object de-serialized from the stream with the true singleton instance
+    protected Object readResolve() {
+        return getInstance();
+    }
+}
+
+```
+
+### 3. Defending Against Cloning Attacks
+
+If a Singleton class extends a class that implements `Cloneable`, calling `clone()` can bypass instantiation controls.
+
+**The Defense:** Explicitly override the `clone()` method to reject the operation.
+
+```java
+@Override
+protected Object clone() throws CloneNotSupportedException {
+    throw new CloneNotSupportedException("Cloning of a Singleton instance is prohibited.");
+}
+
+```
 
 ## Real-World Use Cases
 
-- Logger
-- Configuration Manager
-- Cache
-- Thread Pool
-- Database Connection Pool
-- Spring Beans (default scope = singleton)
+- **System Subsystems:** Loggers (`java.util.logging.Logger`), runtime environments (`java.lang.Runtime`), and configuration management utilities.
+- **Resource Pools:** Database connection pools, thread pools, and cache managers where coordinate control is mandatory.
+- **Application Frameworks:** Spring Framework manages beans as Singletons by default, though it manages them within a distinct container context (Inversion of Control) rather than relying on hardcoded class structures.
 
-## Pros & Cons
+## Trade-Off Analysis
 
-### ✅ Pros
+### Advantages
 
-- Controlled access to sole instance
-- Saves memory and resources
-- Centralized state management
+- **Resource Optimization:** Drastically reduces allocation overhead for heavy architectural elements.
+- **State Alignment:** Ensures all parts of an application interact with identical, up-to-date data.
+- **Lazy Loading:** Postpones resource allocation until the exact moment it is needed.
 
-### ❌ Cons
+### Disadvantages
 
-- Global mutable state
-- Hard to test and mock
-- Tight coupling
-- Can hide dependencies
+- **Testing Bottlenecks:** Singletons introduce global state, making unit tests difficult to isolate. Tests can pollute each other unless carefully reset.
+- **Tight Coupling:** Code that directly references `Singleton.getInstance()` hardcodes dependencies, making it difficult to swap implementations later.
+- **Violation of Single Responsibility Principle (SRP):** The class manages both its primary business logic and its lifecycle control.
 
-## Common Pitfalls (VERY IMPORTANT)
+## When to Use vs. When to Avoid
 
-### ❌ Breaking Singleton using Reflection
+### Use When:
 
-```java
-void breakSingletonUsingReflection() throws Exception {
-    // With the help of reflection we are accessing the private constructor
-    Constructor<Singleton> constructors = Singleton.class.getDeclaredConstructor();
+- You require strict, centralized management over an expensive system-wide asset.
+- An explicit global access point is needed to simplify subsystem synchronization.
 
-    // Making the private constructor accessible
-    constructors.setAccessible(true);
+### Avoid When:
 
-    // Creating a new instance of Singleton using Singleton class itself
-    // and using reflection
-    Singleton instance1 = Singleton.getInstance();
-    Singleton instance2 = constructors.newInstance();
+- You require independent states across different modules in the future.
+- You need to mock dependencies during test execution. In modern software engineering, it is often preferred to use **Dependency Injection (DI)** frameworks (like Spring or Guice) to enforce a singleton lifestyle rather than hardcoding the pattern directly into your domain models.
 
-    // The hashcode of both the instances will be different
-    System.out.println(instance1.hashCode());
-    System.out.println(instance2.hashCode());
-    System.out.println(instance2.equals(instance1)); // false
-}
+## References
 
-✅ Fix:
-
-We can use an boolean flag to which will be set to true when the instance is created. If the flag is already set, we will not create a new instance.
-```
-
-### ❌ Breaking using Serialization
-
-```java
-static void breakSingletonUsingSerialization() throws Exception {
-
-    Singleton instance1 = Singleton.getInstance();
-
-    // Serializing the instance
-    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("file"));
-    oos.writeObject(instance1);
-    oos.close();
-
-    // Deserializing the instance
-    ObjectInputStream ooi = new ObjectInputStream(new FileInputStream("file"));
-    Singleton instance2 = (Singleton) ooi.readObject();
-    ooi.close();
-
-    // The hashcode of both the instances will be different
-    System.out.println(instance1.hashCode());
-    System.out.println(instance2.hashCode());
-    System.out.println(instance2.equals(instance1)); // false
-}
-```
-
-✅ Fix: Singleton should implement Serializable interface and override `readResolve()` method. to return the same instance and it will prevent the singleton pattern from being broken using deserialization.
-
-## 🤔 When to Use
-
-- Exactly **one instance** is required
-- The object represents a **shared system-wide resource**
-- You need **controlled access** to that instance
-- Object creation is **expensive**
-
-## 🤕 Avoid Singleton when
-
-- You need **multiple instances** in future
-- Testing/mocking is important (Singletons make testing harder)
-- The class holds mutable global state
-- Dependency Injection can solve the problem better
-
-📌 Overusing Singleton leads to **hidden global state**.
-
-🧠 **One-liner recall**:
-
-> “Singleton restricts a class to one instance and provides global access to it.”
-
-## Resources
-
-**Articles**
-
-- https://algomaster.io/learn/lld/singleton
-- https://refactoring.guru/design-patterns/singleton
-
-**Videos**
