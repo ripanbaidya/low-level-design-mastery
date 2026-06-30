@@ -1,329 +1,299 @@
-# Strategy Pattern
+## Strategy Design Pattern
 
-<p align="right"><b>Last Updated: 27.02.2026</b></p>
+<p align="right">Last updated - 30.06.2026</p>
 
-## Introduction 🔥
+## Introduction
 
-Strategy Pattern is a **behavioral design pattern** that:
+Have you ever looked at a massive block of nested `if-else` or `switch` statements and felt a sudden wave of dread? We've all been there. As applications grow, conditional logic can quickly spiral out of control, making your codebase rigid, brittle, and terrifying to modify.
 
-> Defines a family of algorithms, encapsulates each one, and makes them interchangeable at runtime.
+Enter the **Strategy Pattern**.
 
-It allows the algorithm to vary independently from the clients that use it.
+The Strategy Pattern is a **behavioral design pattern** that solves this exact headache.
 
-## Real-Life Analogy 🎯
+> **The Core Definition:**
+> The Strategy Pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable at runtime. It allows the algorithm to vary independently from the clients that use it.
 
-Think about **Google Maps**, when you select a route from:
+In plain English: It lets you swap out the behavior of a system on the fly, without rewriting or breaking the system itself.
 
-> 🚗 Car <br> 🚲 Bike <br> 🚶 Walk <br>
+## Real-Life Analogy: The Navigation App
 
-The **navigation algorithm** changes, but the app remains the same.
+Imagine you are building **Google Maps**. When a user wants to get from Point A to Point B, they need a route.
 
-👉 The routing logic is interchangeable. <br>
-👉 The main system does not change. <br>
-👉 You can switch behavior at runtime.
+Depending on their situation, they might select different modes of transit:
 
-That is **Strategy Pattern**.
+- 🚗 **Car Strategy:** Optimizes for highways, avoids traffic jams.
+- 🚲 **Bike Strategy:** Prefers bike lanes, avoids steep hills.
+- 🚶 **Walk Strategy:** Looks for pedestrian walkways and shortcuts through parks.
 
-## Problem Statement 🧩
+The core application framework remains completely identical: the map UI is the same, the GPS tracker is the same, and the destination pin is the same. The only thing changing is the **routing algorithm** underneath.
 
-Imagine we are building a **E-Commerce Payment System** that supports multiple payment methods:
+Because these algorithms are decoupled from the main app, you can easily add a **✈️ Flight Strategy** or a **🚊 Public Transit Strategy** later without touching a single line of your map rendering logic. That is the essence of the Strategy Pattern.
 
-> 💳 **Credit Card**, 📱 **UPI**, 🏦 **PayPal** etc.
+## The Problem: The Dreaded `if-else` Trap
 
-Each method has a different implementation.
+Let’s say we are tasked with building a high-throughput **E-Commerce Payment Gateway** that processes transactions via **Credit Card**, **UPI**, and **PayPal**.
 
-### ❌ Problem Without Strategy Pattern
-
-```java
-if (paymentType.equals("CREDIT_CARD")) { ... }
-else if (paymentType.equals("UPI")) { ... }
-else if (paymentType.equals("PAYPAL")) { ... }
-```
-
-**Problems:**
-
-- Violates Open/Closed Principle. ❌
-- Hard to extend. ❌
-- Difficult to test. ❌
-- Tight coupling. ❌
-
-### How Strategy Pattern Solves This Problem? 😎
-
-Strategy pattern solves this problem by:
-
-- Defining a family of algorithms.
-- Encapsulating each one.
-- Making them interchangeable at runtime.
-- The main system does not change.
-- The algorithm can vary independently from the clients that use it.
-
-## Components ⚙️
-
-| 🏷 Component                | 🎯 Role                 | 💡 Responsibility                |
-| --------------------------- | ----------------------- | -------------------------------- |
-| 🧠 **Strategy (Interface)** | Defines common contract | Declares method(s) for algorithm |
-| 🏗 **Concrete Strategy**    | Implements algorithm    | Provides specific behavior       |
-| 🎛 **Context**              | Uses Strategy           | Delegates execution to Strategy  |
-| 👤 **Client**               | Chooses strategy        | Decides which strategy to use    |
-
-🎯 **Easy Way To Remember**
-
-🧠 **Strategy** = What to do <br>
-🏗 **Concrete Strategy** = How to do <br>
-🎛 **Context** = Uses it <br>
-👤 **Client** = Chooses it <br>
-
-## UML
-
-![](/resources/images/patterns/behavioural/strategy-uml.png)
-
-## Code
-
-### **Project Structure** 📁
-
-```
-com.designpatterns.strategy
-│
-├── strategy
-│   ├── PaymentStrategy.java
-│   ├── CreditCardPaymentStrategy.java
-│   ├── UpiPaymentStrategy.java
-│   └── PaypalPaymentStrategy.java
-│   │
-│   ├── context
-│   │   └── PaymentContext.java
-│   │
-│   └── factory
-│       └── PaymentStrategyFactory.java
-│
-└── Application.java
-```
-
-### 1️⃣ Strategy Interface
+Without thinking about design patterns, your first instinct might be to write code like this:
 
 ```java
-package com.designpatterns.strategy.strategy;
+public class PaymentService {
+    public void processPayment(String paymentType, BigDecimal amount) {
+        if (paymentType.equalsIgnoreCase("CREDIT_CARD")) {
+            System.out.println("Validating card limits...");
+            System.out.println("Charging Credit Card: ₹" + amount);
+        } else if (paymentType.equalsIgnoreCase("UPI")) {
+            System.out.println("Generating UPI Intent QR Code...");
+            System.out.println("Processing UPI transaction: ₹" + amount);
+        } else if (paymentType.equalsIgnoreCase("PAYPAL")) {
+            System.out.println("Redirecting to PayPal secure sandbox...");
+            System.out.println("Charging PayPal account: ₹" + amount);
+        } else {
+            throw new IllegalArgumentException("Unsupported payment method!");
+        }
+    }
+}
 
+```
+
+### Why is this bad software engineering?
+
+- **Violates the Open/Closed Principle (OCP):** If the business decides to support _Crypto Payments_ tomorrow, you must open this existing class and modify its core logic. Any typo here could break your entire payment infrastructure.
+- **Poor Testability:** You cannot unit test the UPI logic without dragging along the dependencies and variables required for Credit Cards.
+- **High Cognitive Load:** As more payment methods are added, this single file turns into a 2,000-line "God Class" that no one wants to maintain.
+
+## The Solution: Structural Breakdown ⚙️
+
+The Strategy Pattern breaks this problem down into four highly cooperative components:
+
+| Component                   | Role                                                                              | Real-World Analogy                                        |
+| --------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Strategy (Interface)** | The contract defining **what** needs to be done.                                  | The general idea of "Paying".                             |
+| **Concrete Strategy**    | The specific implementation of **how** it is done.                                | The exact mechanics of a UPI vs. Credit Card transaction. |
+| **Context**              | The engine that **uses** the strategy. It holds a reference to a Strategy object. | The Checkout Cart/Billing System.                         |
+| **Client**               | The orchestrator that **chooses** the strategy and passes it to the Context.      | The actual user clicking the "Pay via UPI" button.        |
+
+## UML Representation
+
+![](/resources/images/patterns/behavioural/strategy.png)
+
+## Implementation
+
+Let's clean up our payment system using modern, robust Java. We'll separate our concerns cleanly into packages.
+
+### 1. Strategy Interface
+
+This defines our common execution standard.
+
+```java
 import java.math.BigDecimal;
 
 public interface PaymentStrategy {
-
-  void pay(BigDecimal amount);
+    void pay(BigDecimal amount);
 }
+
 ```
 
-### 2️⃣ Concrete Strategy
+### 2. Concrete Strategies
+
+Each strategy is an isolated, single-purpose class that is incredibly easy to test or replace.
 
 ```java
-package com.designpatterns.strategy.strategy;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class CreditCardPaymentStrategy implements PaymentStrategy {
+    private final String cardNumber;
+    private final String cardHolderName;
 
-  private final String cardNumber;
-  private final String cardHolderName;
+    public CreditCardPaymentStrategy(String cardNumber, String cardHolderName) {
+        this.cardNumber = Objects.requireNonNull(cardNumber, "Card number cannot be null");
+        this.cardHolderName = Objects.requireNonNull(cardHolderName, "Holder name cannot be null");
+    }
 
-  public CreditCardPaymentStrategy(String cardNumber, String cardHolderName) {
-    this.cardNumber = Objects.requireNonNull(cardNumber);
-    this.cardHolderName = Objects.requireNonNull(cardHolderName);
-  }
-
-  @Override
-  public void pay(BigDecimal amount) {
-    System.out.println("Processing credit card payment...");
-    System.out.println("Card Holder: " + cardHolderName);
-    System.out.println("Amount Paid: ₹" + amount);
-  }
+    @Override
+    public void pay(BigDecimal amount) {
+        System.out.println("💳 Processing credit card payment...");
+        System.out.println("   Holder: " + cardHolderName + " | Card: XXXX-XXXX-XXXX-" + cardNumber.substring(cardNumber.length() - 4));
+        System.out.println("   Amount Paid: ₹" + amount);
+    }
 }
+
 ```
 
 ```java
-package com.designpatterns.strategy.strategy;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class UpiPaymentStrategy implements PaymentStrategy {
+    private final String upiId;
 
-  private final String upiId;
+    public UpiPaymentStrategy(String upiId) {
+        this.upiId = Objects.requireNonNull(upiId, "UPI ID cannot be null");
+    }
 
-  public UpiPaymentStrategy(String upiId) {
-    this.upiId = Objects.requireNonNull(upiId);
-  }
-
-  @Override
-  public void pay(BigDecimal amount) {
-    System.out.println("Processing UPI payment...");
-    System.out.println("UPI ID: " + upiId);
-    System.out.println("Amount Paid: ₹" + amount);
-  }
+    @Override
+    public void pay(BigDecimal amount) {
+        System.out.println("📱 Processing UPI payment...");
+        System.out.println("   VPA: " + upiId);
+        System.out.println("   Amount Paid: ₹" + amount);
+    }
 }
+
 ```
 
-### 3️⃣ Context
+```java
+import java.math.BigDecimal;
+import java.util.Objects;
+
+public class PaypalPaymentStrategy implements PaymentStrategy {
+    private final String email;
+
+    public PaypalPaymentStrategy(String email) {
+        this.email = Objects.requireNonNull(email, "Email cannot be null");
+    }
+
+    @Override
+    public void pay(BigDecimal amount) {
+        System.out.println("🏦 Processing PayPal payment...");
+        System.out.println("   Account: " + email);
+        System.out.println("   Amount Paid: ₹" + amount);
+    }
+}
+
+```
+
+### 3. Context
+
+The Context doesn’t care _how_ a payment happens. It just accepts a strategy and tells it to run.
 
 ```java
-package com.designpatterns.strategy.context;
-
 import com.designpatterns.strategy.strategy.PaymentStrategy;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class PaymentContext {
+    private PaymentStrategy paymentStrategy;
 
-  private PaymentStrategy paymentStrategy;
+    // Inject strategy via Constructor
+    public PaymentContext(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = Objects.requireNonNull(paymentStrategy, "Initial strategy cannot be null");
+    }
 
-  public PaymentContext(PaymentStrategy paymentStrategy) {
-    this.paymentStrategy = Objects.requireNonNull(paymentStrategy);
-  }
+    // Allow dynamic runtime switching via Setter
+    public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = Objects.requireNonNull(paymentStrategy, "Strategy cannot be null");
+    }
 
-  public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
-    this.paymentStrategy = Objects.requireNonNull(paymentStrategy);
-  }
-
-  public void executePayment(BigDecimal amount) {
-    paymentStrategy.pay(amount);
-  }
+    public void executePayment(BigDecimal amount) {
+        paymentStrategy.pay(amount);
+    }
 }
+
 ```
 
-**Factory** 🏭
+### 4. Simple Strategy Factory
+
+To shield our client from complex instantiation details, we hide creation behind a clean Factory utility.
 
 ```java
-package com.designpatterns.strategy.factory;
-
-import com.designpatterns.strategy.strategy.CreditCardPaymentStrategy;
-import com.designpatterns.strategy.strategy.PaymentStrategy;
-import com.designpatterns.strategy.strategy.PaypalPaymentStrategy;
-import com.designpatterns.strategy.strategy.UpiPaymentStrategy;
+import com.designpatterns.strategy.strategy.*;
 
 public final class PaymentStrategyFactory {
+    private PaymentStrategyFactory() {} // Prevent instantiation
 
-  private PaymentStrategyFactory() {
-  }
+    public static PaymentStrategy createCreditCardStrategy(String cardNumber, String cardHolderName) {
+        return new CreditCardPaymentStrategy(cardNumber, cardHolderName);
+    }
 
-  public static PaymentStrategy createCreditCardStrategy(String cardNumber,
-                                                         String cardHolderName) {
-    return new CreditCardPaymentStrategy(cardNumber, cardHolderName);
-  }
+    public static PaymentStrategy createUpiStrategy(String upiId) {
+        return new UpiPaymentStrategy(upiId);
+    }
 
-  public static PaymentStrategy createUpiStrategy(String upiId) {
-    return new UpiPaymentStrategy(upiId);
-  }
-
-  public static PaymentStrategy createPaypalStrategy(String email) {
-    return new PaypalPaymentStrategy(email);
-  }
+    public static PaymentStrategy createPaypalStrategy(String email) {
+        return new PaypalPaymentStrategy(email);
+    }
 }
+
 ```
 
-### 4️⃣ Client
+### 5. Client Application
+
+The orchestrator that wires everything together. Watch how seamlessly we change payment mechanics at runtime!
 
 ```java
-package com.designpatterns.strategy;
-
 import com.designpatterns.strategy.context.PaymentContext;
 import com.designpatterns.strategy.factory.PaymentStrategyFactory;
 import com.designpatterns.strategy.strategy.PaymentStrategy;
-
 import java.math.BigDecimal;
 
 public class StrategyApplication {
-  public static void main(String[] args) {
+    public static void main(String[] args) {
+        System.out.println("=== Welcome to the Checkout Counter ===\n");
 
-    // Create Credit Card Strategy
-    PaymentStrategy creditCardStrategy = PaymentStrategyFactory
-        .createCreditCardStrategy("1234-5678-9012-3456", "Ripan Baidya");
+        // 1. Client decides to use Credit Card
+        PaymentStrategy cardStrategy = PaymentStrategyFactory
+                .createCreditCardStrategy("1234-5678-9876-5432", "Ripan Baidya");
 
-    PaymentContext paymentContext = new PaymentContext(creditCardStrategy);
-    paymentContext.executePayment(BigDecimal.valueOf(1500));
+        PaymentContext context = new PaymentContext(cardStrategy);
+        context.executePayment(BigDecimal.valueOf(1500.00));
 
-    System.out.println("----- Switching Payment Method -----");
+        System.out.println("\n--- User changes mind & switches method ---\n");
 
-    PaymentStrategy upiStrategy = PaymentStrategyFactory.createUpiStrategy("ripan@upi");
-
-    paymentContext.setPaymentStrategy(upiStrategy);
-    paymentContext.executePayment(BigDecimal.valueOf(750));
-  }
+        // 2. Dynamic switch to UPI at runtime
+        PaymentStrategy upiStrategy = PaymentStrategyFactory.createUpiStrategy("ripan@upi");
+        context.setPaymentStrategy(upiStrategy);
+        context.executePayment(BigDecimal.valueOf(750.50));
+    }
 }
+
 ```
 
 ### Output
 
-```
+```text
 Processing credit card payment...
 Card Holder: Ripan Baidya
-Amount Paid: ₹1500
------ Switching Payment Method -----
+Amount Paid: ₹1500.0
+
+--- User changes mind & switches method ---
+
 Processing UPI payment...
 UPI ID: ripan@upi
-Amount Paid: ₹750
+Amount Paid: ₹750.5
 ```
 
-## Pattern Participants 🏗
+## When to Use and When Not to Use
 
-| Role              | In Our Example                                                             |
-| ----------------- | -------------------------------------------------------------------------- |
-| Strategy          | `PaymentStrategy`                                                          |
-| Concrete Strategy | `CreditCardPaymentStrategy`, `UpiPaymentStrategy`, `PaypalPaymentStrategy` |
-| Context           | `PaymentContext`                                                           |
-| Client            | `Application`                                                              |
+### Use when:
 
-## When To Use Strategy Pattern and When not to use it
+- **Runtime Swapping Needed:** Use this when an object must perform variations of an action dynamically based on state, user preferences, or configurations.
+- **Isolating Core Logic from Data:** If your algorithms use private, platform-dependent data, the pattern isolates this execution logic away from the main application flow.
+- **Eliminating Conditional Bloat:** If you see a complex `switch` or `if-else` blocks controlling variations of the exact same task, refactor immediately to Strategy.
 
-### 📌 When To Use Strategy Pattern
+### NOT to Use when:
 
-| ✅ Situation                       | 🚀 Why Strategy Helps                            |
-| ---------------------------------- | ------------------------------------------------ |
-| Multiple ways to perform a task    | Encapsulates each algorithm separately           |
-| Large `if-else` or `switch` blocks | Removes conditional complexity                   |
-| Need runtime behavior change       | Can swap strategy dynamically                    |
-| Follow Open/Closed Principle       | Add new strategy without modifying existing code |
-| Algorithms evolve frequently       | Changes are isolated in separate classes         |
-| Better unit testing required       | Strategies can be mocked easily                  |
+- **Static Behaviors:** If you only have one or two algorithms that almost never change, introducing Strategy is over-engineering. Stick to a simple method.
+- **Functional Alternatives Exist:** In modern functional programming languages (or Java 8+ using Lambdas), you can pass a function or method reference as a parameter directly instead of generating entire files for a simple 1-line behavior.
 
-### 🚫 When NOT To Use Strategy Pattern
+## Trade-offs Analysis
 
-| ❌ Situation                                    | ⚠ Why Avoid It                         |
-| ----------------------------------------------- | -------------------------------------- |
-| Only 1 or 2 simple algorithms                   | Over-engineering                       |
-| Algorithm rarely changes                        | Adds unnecessary abstraction           |
-| Behavior tightly coupled to context             | Strategy separation may not make sense |
-| Performance-critical path with very small logic | Extra object creation overhead         |
-| Small project / quick prototype                 | Adds too many classes                  |
+### The Advantages
 
-## ⚖️ Pros and Cons of Strategy Pattern
+1. **Strict Adherence to SOLID:** You can add new strategies without changing existing code (Open/Closed) and isolate distinct code behaviors cleanly (Single Responsibility).
+2. **Runtime Flexibility:** Allows an application to react gracefully to user inputs on the fly.
+3. **Encourages Composition over Inheritance:** Avoids rigid class hierarchies created by relying on child classes to modify parent behaviors.
 
-### ✅ Advantages
+### The Disadvantages
 
-| 🌟 Advantage                     | 💡 Explanation                                   |
-| -------------------------------- | ------------------------------------------------ |
-| 🔓 Follows Open/Closed Principle | Add new strategy without modifying existing code |
-| 🔄 Runtime flexibility           | Behavior can change dynamically                  |
-| 🧹 Cleaner code                  | Removes `if-else` chains                         |
-| 🧪 Better testability            | Mock strategy independently                      |
-| 🧩 Promotes composition          | Prefers composition over inheritance             |
-| 📦 Separation of concerns        | Algorithm separated from context                 |
+1. **Explosion of Classes:** If you have 20 different behaviors, you now have 20 new `.java` files to maintain.
+2. **Client-Side Awareness:** The client application _must_ know how strategies differ to choose the correct one. It leaks business logic context up to the controller layer.
 
-### ❌ Disadvantages
+## 💡 Crushing the Design Pattern Interview
 
-| ⚠ Drawback                                 | 💡 Explanation                       |
-| ------------------------------------------ | ------------------------------------ |
-| 📁 More classes                            | Each strategy becomes a new class    |
-| 🧠 Slightly harder to understand initially | Extra abstraction layer              |
-| 👤 Client must know strategy differences   | Client chooses which strategy to use |
-| 🔄 Can increase object creation            | Each strategy is a separate object   |
+When an interviewer brings up the Strategy Pattern, distinguish yourself by offering these quick, expert points:
 
-## Interview Tips 🧠 
+> - **The Punchy Summary:** "The Strategy pattern is about favoring object composition over inheritance. It decouples the context from algorithmic implementation details by leaning on an interface contract."
 
-> Strategy Pattern has four main components — Strategy interface, Concrete Strategies, Context, and Client. The Context delegates behavior to the Strategy, and the Client decides which Strategy to use.
+> - **JDK Real-World Example:** Don't just give the payment example; point out that Java uses it natively! `java.util.Comparator#compare()` is a classic example of the Strategy Pattern. Every time you pass a custom sorting comparator to `Collections.sort()`, you are providing a structural sorting strategy.
 
-> Strategy Pattern reduces conditional complexity and promotes composition over inheritance, but it increases the number of classes. It is ideal when algorithms vary independently and need runtime flexibility.
-
-## Resources 📚
-
-🔗 https://algomaster.io/learn/lld/strategy <br>
-🔗 https://codewitharyan.com/tech-blogs/strategy-design-pattern <br>
+> - **The Dynamic Key:** "The magic of the Strategy pattern isn't just decoupling; it’s the fact that changing strategies happens dynamically at _runtime_ using structural setters, instead of locking down logic at compilation."
