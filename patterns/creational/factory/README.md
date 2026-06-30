@@ -1,53 +1,215 @@
-# Factory Method Pattern
+## Factory Design Pattern
 
-<p align="right"><b>Last Updated: 26.02.2026</b></p>
+<p align="right">Last updated - 30.06.2026</p>
 
-![factory-banner](/resources/images/patterns/creational/factory-banner.png)
+## Introduction
 
-## Introduction 🔥
+The **Factory Pattern** is a **Creational Design Pattern** that defines an interface (or abstract class) for creating objects but allows subclasses to decide which concrete object should be instantiated.
 
-Factory Method Pattern defines an **interface for creating an object**, but lets subclasses decide **which class to
-instantiate**.
+Instead of creating objects directly using the `new` keyword throughout the application, the responsibility of object creation is delegated to specialized factory classes.
 
-It promotes:
+This provides two important benefits:
 
-- ✅ Loose Coupling
-- ✅ Open/Closed Principle
-- ✅ Clean Object Creation Logic
+- The client depends on abstractions rather than concrete implementations.
+- New object types can be introduced without modifying existing client code.
 
-## Problem 🤔
+The Factory Method pattern follows the **Open/Closed Principle** by making the system open for extension while closed for modification.
 
-Suppose we have a **notification system** that **sends notifications via email or push notifications**.
+## The Problem
 
-The notification system should be **flexible** enough to **support different notification** types in the future without modifying the existing code.
+Imagine you're building a notification service for an application.
 
-## Solution 🎯
+Initially, the application only supports email notifications.
 
-Factory Method Pattern can be used to create a **flexible notification system** that can be **extended** with new notification types **in the future**.
-
-## Components ⚙️
-
-1️⃣ **Product (Interface)**: The **interface** or **abstract class** that defines the **contract** for all objects the factory method creates. Every concrete product implements this interface, which means the rest of the system can work with any product without knowing its concrete type.
-
-2️⃣ **Concrete Products**: The actual classes that implement the Product interface. Each one provides its own behavior.
-
-3️⃣ **Creator (Abstract Factory)**: An abstract class or interface that Declares the factory method, which returns an object of type Product. It can also contain common logic that depends on the product.
-
-4️⃣ **Concrete Creators**: Implement the factory method to return a specific product. These classes are responsible for creating objects of a specific type.
-
-5️⃣ **Client**: The client code that uses the factory method to create objects without knowing the specific class of the object.
-
-## UML
-
-![factory-method-uml](/resources/images/patterns/creational/factory-uml.png)
-
-## Code 🧑‍💻
-
-### **Package Structure** 📦
-
+```java
+Notification notification = new EmailNotification();
+notification.send("Welcome!");
 ```
-com.designpatterns.factory
 
+Everything works fine.<br>
+Later, the business requirements change.
+
+The application must now support:
+
+- Email notifications
+- Push notifications
+- SMS notifications
+- WhatsApp notifications
+
+A straightforward solution would be:
+
+```java
+if(type.equals("EMAIL")){
+    notification = new EmailNotification();
+}
+else if(type.equals("PUSH")){
+    notification = new PushNotification();
+}
+else if(type.equals("SMS")){
+    notification = new SmsNotification();
+}
+```
+
+Although this works, it introduces several problems.
+
+### Problems
+
+- Client code becomes tightly coupled to concrete classes.
+- Every new notification type requires modifying existing code.
+- Object creation logic becomes scattered throughout the application.
+- The application gradually violates the **Open/Closed Principle**.
+
+As the number of notification types grows, maintaining the system becomes increasingly difficult.
+
+## The Solution
+
+Instead of allowing the client to decide which notification object to create, the Factory Method pattern delegates that responsibility to factory classes.
+
+Each factory knows how to create exactly one type of notification.
+
+The client only interacts with the factory.
+
+```java
+NotificationFactory factory = new EmailNotificationFactory();
+
+factory.sendNotification("Welcome!");
+```
+
+If tomorrow you introduce `SmsNotification`, you simply create a new `SmsNotificationFactory`.
+
+No existing client code needs to change and this makes the system easier to maintain and extend.
+
+## How Factory Method Works
+
+The pattern separates object creation from object usage.
+
+The workflow is straightforward:
+
+1. The client chooses a factory.
+2. The factory creates the appropriate product.
+3. The client uses the product through its interface.
+4. The client never knows which concrete class was instantiated.
+
+Instead of writing:
+
+```text
+Client
+   ↓
+new EmailNotification()
+```
+
+the flow becomes:
+
+```text
+Client
+   ↓
+NotificationFactory
+   ↓
+createNotification()
+   ↓
+EmailNotification
+```
+
+The client depends only on the abstraction.
+
+## Components
+
+### Product
+
+The Product defines the common interface shared by all objects created by the factory.
+
+Every concrete product implements this interface.
+
+```java
+public interface Notification {
+    void send(String message);
+}
+```
+
+Because all notification types implement the same interface, the client can work with any notification without knowing its implementation.
+
+### Concrete Products
+
+Concrete Products provide the actual implementation of the Product interface.
+
+Examples:
+
+- EmailNotification
+- PushNotification
+- SmsNotification
+
+Each class implements its own notification behavior while exposing the same interface.
+
+### Creator
+
+The Creator declares the factory method. It may also contain common business logic that depends on the Product.
+
+Notice that the Creator never creates concrete products directly. Instead, it delegates that responsibility to subclasses.
+
+```java
+public abstract class NotificationFactory {
+
+    protected abstract Notification createNotification();
+
+    public void sendNotification(String message) {
+
+        Notification notification = createNotification();
+
+        notification.send(message);
+    }
+}
+```
+
+The factory method is:
+
+```java
+createNotification()
+```
+
+### Concrete Creators
+
+Concrete Creators override the factory method.
+
+Each creator returns a different concrete product.
+
+For example:
+
+```text
+EmailNotificationFactory
+        ↓
+EmailNotification
+```
+
+```text
+PushNotificationFactory
+        ↓
+PushNotification
+```
+
+Each factory knows how to create only one product.
+
+## Client
+
+The client interacts only with the Creator, It never creates products directly.
+
+```java
+NotificationFactory factory = new EmailNotificationFactory();
+
+factory.sendNotification("Welcome");
+```
+
+This reduces coupling between the client and the implementation classes.
+
+## UML Representation
+
+![UML](/resources/images/patterns/creational/factory-uml.png)
+
+## Implementation
+
+#### Folder Structure
+
+```text
+app
 ├── model
 │   └── Notification.java
 │
@@ -65,28 +227,20 @@ com.designpatterns.factory
     └── FactoryApplication.java
 ```
 
-**Step By Step Implementation**
-
-### 1️⃣ **Product Interface**
+### Product Interface
 
 ```java
-package com.designpatterns.factory.model;
-
 public interface Notification {
 
   void send(String message);
 }
 ```
 
-### **2️⃣ Concrete Products**
+### Concrete Products
 
-**Email Notification** 📧
+#### Email Notification
 
 ```java
-package com.designpatterns.factory.implementation;
-
-import com.designpatterns.factory.model.Notification;
-
 public class EmailNotification implements Notification {
 
   @Override
@@ -96,13 +250,9 @@ public class EmailNotification implements Notification {
 }
 ```
 
-**Push Notification** 📱
+#### Push Notification
 
 ```java
-package com.designpatterns.factory.implementation;
-
-import com.designpatterns.factory.model.Notification;
-
 public class PushNotification implements Notification {
 
   @Override
@@ -112,20 +262,14 @@ public class PushNotification implements Notification {
 }
 ```
 
-### 3️⃣ **Simple Factory** **(Not GoF, but commonly used)**
+### Simple Factory (Not GoF, but commonly used)
 
-⚠️ This is **NOT** the Factory Method pattern officially, It centralizes object creation using **condition logic**.
+This is NOT the Factory Method pattern officially, It centralizes object creation using condition logic.
 
 ```java
-package com.designpatterns.factory.factory;
-
-import com.designpatterns.factory.model.Notification;
-import com.designpatterns.factory.implementation.EmailNotification;
-import com.designpatterns.factory.implementation.PushNotification;
-
 public class SimpleNotificationFactory {
 
-  public static Notification createNotification(String type) {
+public static Notification createNotification(String type) {
 
     return switch (type.toUpperCase()) {
       case "EMAIL" -> new EmailNotification();
@@ -136,15 +280,11 @@ public class SimpleNotificationFactory {
 }
 ```
 
-🚨 **Problem**: Violates **Open/Closed Principle** (needs modification when new type is added).
+> Problem: It Violates the Open/Closed Principle (needs modification when new type is added).
 
-### 4️⃣ **Creator (Factory Method Pattern Core)**
+### Creator (Factory Method Pattern Core)
 
 ```java
-package com.ripan.designpatterns.factory.factory;
-
-import com.ripan.designpatterns.factory.model.Notification;
-
 public abstract class NotificationFactory {
 
   protected abstract Notification createNotification();
@@ -156,16 +296,11 @@ public abstract class NotificationFactory {
 }
 ```
 
-### 5️⃣ **Concrete Factories**
+### Concrete Factories
 
-**Email Factory** 📧
+#### Email Factory
 
 ```java
-package com.designpatterns.factory.factory;
-
-import com.designpatterns.factory.model.Notification;
-import com.designpatterns.factory.implementation.EmailNotification;
-
 public class EmailNotificationFactory extends NotificationFactory {
 
   @Override
@@ -175,14 +310,9 @@ public class EmailNotificationFactory extends NotificationFactory {
 }
 ```
 
-**Push Factory** 📱
+#### Push Factory
 
 ```java
-package com.designpatterns.factory.factory;
-
-import com.designpatterns.factory.model.Notification;
-import com.designpatterns.factory.implementation.PushNotification;
-
 public class PushNotificationFactory extends NotificationFactory {
 
   @Override
@@ -192,15 +322,9 @@ public class PushNotificationFactory extends NotificationFactory {
 }
 ```
 
-### 6️⃣ **Client Code**
+### Client Code
 
 ```java
-package com.designpatterns.factory.client;
-
-import com.designpatterns.factory.factory.EmailNotificationFactory;
-import com.designpatterns.factory.factory.NotificationFactory;
-import com.designpatterns.factory.factory.PushNotificationFactory;
-
 public class FactoryApplication {
   public static void main(String[] args) {
 
@@ -217,30 +341,139 @@ public class FactoryApplication {
 }
 ```
 
-## Why Factory Method is Better Than Simple Factory?
+## Simple Factory vs Factory Method
 
-| Simple Factory    | Factory Method         |
-| ----------------- | ---------------------- |
-| Uses `if/switch`  | Uses Polymorphism      |
-| Violates OCP      | Follows OCP            |
-| Centralized logic | Decentralized creation |
-| Harder to extend  | Easy to extend         |
+Many developers confuse these two patterns.
 
-## 🧠 When To Use Factory Method?
+Although they solve similar problems, they are different.
 
-Use it when:
+### Simple Factory
 
-- Object creation logic is complex
-- You want loose coupling
-- You want to follow Open/Closed Principle
-- The client should not know concrete classes
-- Creation varies based on subclass
+A Simple Factory uses conditional logic to decide which object to create.
+
+```java
+switch(type){
+
+case EMAIL:
+    return new EmailNotification();
+
+case PUSH:
+    return new PushNotification();
+
+}
+```
+
+This centralizes object creation, but every new product requires modifying the factory. Therefore, it violates the **Open/Closed Principle**.
+
+It is also **not** one of the original GoF design patterns.
+
+### Factory Method
+
+Factory Method removes conditional logic. Instead of using `if` or `switch`, each product has its own factory.
+
+```text
+EmailNotificationFactory
+        ↓
+EmailNotification
+
+PushNotificationFactory
+        ↓
+PushNotification
+```
+
+Adding a new notification requires creating a new factory class instead of modifying existing ones.
+
+This makes the design extensible.
+
+### Why Factory Method Is Better Than Simple Factory
+
+| Simple Factory                   | Factory Method                                            |
+| -------------------------------- | --------------------------------------------------------- |
+| Uses conditional statements      | Uses polymorphism                                         |
+| One factory creates every object | Every product has its own factory                         |
+| Violates Open/Closed Principle   | Follows Open/Closed Principle                             |
+| Requires modifying existing code | New factories can be added without changing existing ones |
+| Suitable for small applications  | Better for scalable applications                          |
+
+## Execution Flow
+
+Suppose the client wants to send an email notification.
+
+The execution happens in the following order:
+
+```text
+FactoryApplication
+        │
+        ▼
+EmailNotificationFactory
+        │
+        ▼
+createNotification()
+        │
+        ▼
+EmailNotification
+        │
+        ▼
+      send()
+```
+
+The client never directly creates an `EmailNotification`.
+
+## Real-World Use Cases
+
+Factory Method is widely used in real-world software.
+
+Some common examples include:
+
+- Notification systems (Email, SMS, Push)
+- Database drivers (MySQL, PostgreSQL, Oracle)
+- Payment gateways (Stripe, PayPal, Razorpay)
+- Logging frameworks
+- Cloud storage providers (AWS S3, Azure Blob Storage, Google Cloud Storage)
+- Document exporters (PDF, Excel, CSV)
+- GUI frameworks that create platform-specific UI components
+
+## Trade-Off Analysis
+
+### Advantages
+
+- Reduces coupling between the client and concrete classes.
+- Follows the Open/Closed Principle.
+- Encapsulates object creation.
+- Makes the code easier to maintain.
+- Improves scalability as new products are introduced.
+- Promotes polymorphism over conditional logic.
+
+### Disadvantages
+
+- Introduces more classes.
+- Slightly increases the complexity of the design.
+- May be unnecessary for applications with only one or two product types.
+
+## When to Use vs. When to Avoid
+
+### Use when
+
+Use the Factory Method pattern when:
+
+- Object creation is complex.
+- The client should not know concrete classes.
+- New product types are expected in the future.
+- You want to follow the Open/Closed Principle.
+- Different subclasses create different objects.
+
+### Avoid when
+
+Avoid using the Factory Method pattern when:
+
+- Object creation is simple and unlikely to change.
+- The application has only one concrete implementation.
+- Introducing additional factory classes adds unnecessary complexity.
 
 ## Conclusion
 
-Factory Method Pattern is a **flexible** and **extensible** design pattern that can be used to create objects in a **loose coupled** way.
+The Factory Method Pattern separates **object creation** from **object usage** by delegating the responsibility of creating objects to factory classes.
 
-## Resources
+Rather than instantiating concrete classes directly, the client works with abstractions and relies on factories to provide the appropriate implementation.
 
-🔗 https://algomaster.io/learn/lld/factory-method <br>
-🔗 https://refactoring.guru/design-patterns/factory-method
+This approach reduces coupling, improves maintainability, and makes the application easier to extend. While it introduces additional classes, the benefits become significant as the number of product types grows, making Factory Method one of the most widely used creational design patterns in modern object-oriented software development.
