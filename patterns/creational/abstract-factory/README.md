@@ -1,62 +1,225 @@
-# Abstract Factory Pattern
+## Abstract Factory Pattern
 
-<p align="right"><b>Last updated: 26.02.2026</b></p>
+<p align="right">Last Updated: 30.06.2026</p>
 
-<!-- ![abstract-factory-banner](/resources/images/patterns/creational/abstract-factory-banner.png) -->
+## Introduction
 
-## Introduction 🔥
+The **Abstract Factory Pattern** is a **Creational Design Pattern** that provides an interface for creating **families of related or dependent objects** without specifying their concrete classes.
 
-The **Abstract Factory pattern** is a **creational design pattern** that provides an interface for creating families of related or dependent objects without specifying their concrete classes. 
+Unlike the Factory Method pattern, which focuses on creating a **single product**, the Abstract Factory pattern creates **multiple related products** that are designed to work together.
 
-It is particularly useful when a system needs to be independent of how its products are created, composed, and represented.
+The client interacts only with the abstract factory and abstract product interfaces, making the application independent of the concrete implementations.
 
-## 🚨 Problem Statement
+This pattern is especially useful when a system must support multiple product families while ensuring that objects from different families are never mixed together.
 
-Let's say we are building an **E-commerce** system that supports multiple payment providers like:
+## The Problem
 
-- Stripe
-- Razorpay
+Imagine you're building an e-commerce platform that supports multiple payment providers.
 
-Each provider requires a family of related components:
+Initially, the application integrates with **Stripe**.
+
+Every payment provider requires three components:
+
+- Payment Processor
+- Refund Processor
+- Webhook Handler
+
+The client creates them directly.
+
+```java
+PaymentProcessor paymentProcessor = new StripePaymentProcessor();
+RefundProcessor refundProcessor = new StripeRefundProcessor();
+WebhookHandler webhookHandler = new StripeWebhookHandler();
+```
+
+Everything works correctly.
+
+Now the business decides to support **Razorpay** in addition to Stripe.
+
+Without a proper design, developers might accidentally mix implementations.
+
+```java
+PaymentProcessor paymentProcessor = new StripePaymentProcessor();
+
+RefundProcessor refundProcessor = new RazorpayRefundProcessor();
+
+WebhookHandler webhookHandler = new StripeWebhookHandler();
+```
+
+Although the code compiles successfully, it introduces a serious business problem.
+
+- Payments are processed using Stripe.
+- Refunds are processed using Razorpay.
+- Webhooks are handled by Stripe again.
+
+The application is now working with objects that were never designed to work together.
+
+These kinds of inconsistencies often lead to production issues that are difficult to diagnose.
+
+## Problems Without Abstract Factory
+
+- Client code directly depends on concrete implementations.
+- Product families can accidentally be mixed.
+- Switching providers requires changes throughout the application.
+- Object creation logic becomes scattered across the codebase.
+- Maintaining consistency becomes increasingly difficult as more providers are introduced.
+
+## The Solution
+
+Instead of allowing the client to create each component individually, delegate the responsibility to a factory.
+
+Each payment provider has its own factory that creates every component belonging to that provider.
+
+For example,
+
+A **Stripe factory** always creates:
+
+- StripePaymentProcessor
+- StripeRefundProcessor
+- StripeWebhookHandler
+
+A **Razorpay factory** always creates:
+
+- RazorpayPaymentProcessor
+- RazorpayRefundProcessor
+- RazorpayWebhookHandler
+
+The client simply chooses one factory.
+
+```java
+PaymentGatewayFactory factory = new StripePaymentGatewayFactory();
+```
+
+Every object produced by the factory automatically belongs to the Stripe family.
+
+This guarantees consistency throughout the application.
+
+## How Abstract Factory Works
+
+The client never creates concrete objects directly.
+
+Instead, the workflow looks like this.
+
+```text
+Client
+      │
+      ▼
+PaymentGatewayFactory
+      │
+      ├──────────────► PaymentProcessor
+      │
+      ├──────────────► RefundProcessor
+      │
+      └──────────────► WebhookHandler
+```
+
+Changing the entire payment provider requires changing only one line.
+
+```java
+PaymentGatewayFactory factory =
+        new RazorpayPaymentGatewayFactory();
+```
+
+Everything else continues to work without modification.
+
+## Components
+
+### Abstract Products
+
+Abstract Products define the contracts shared by all concrete products.
+
+In our example, they are
 
 - PaymentProcessor
 - RefundProcessor
 - WebhookHandler
 
-❌ What can go wrong?
+Every payment provider implements these interfaces.
 
-If we don’t use Abstract Factory:
+### Concrete Products
+
+Concrete Products provide provider-specific implementations.
+
+For the Stripe family,
+
+- StripePaymentProcessor
+- StripeRefundProcessor
+- StripeWebhookHandler
+
+For the Razorpay family,
+
+- RazorpayPaymentProcessor
+- RazorpayRefundProcessor
+- RazorpayWebhookHandler
+
+Each family is designed to work together.
+
+### Abstract Factory
+
+The Abstract Factory declares methods for creating every product in a family.
 
 ```java
-PaymentProcessor processor = new StripePaymentProcessor();
-RefundProcessor refund = new RazorpayRefundProcessor();  // ❌ Wrong combination
+public interface PaymentGatewayFactory {
+
+    PaymentProcessor createPaymentProcessor();
+
+    RefundProcessor createRefundProcessor();
+
+    WebhookHandler createWebhookHandler();
+}
 ```
 
-Now:
+Notice that it never mentions Stripe or Razorpay.
 
-- Payment is processed via Stripe
-- Refund is attempted via Razorpay
-- System becomes inconsistent
-- Real production bug 🚨
+It only returns abstractions.
 
-## 🧠 Solution
+### Concrete Factories
 
-We must ensure:
+Each concrete factory creates one complete family of products.
 
-- If **Stripe** is selected → ALL Stripe components are used
-- If **Razorpay** is selected → ALL Razorpay components are used
-
-This requirement of creating consistent families of related objects is exactly why we use Abstract Factory Pattern.
-
-## UML
-
-![](/resources/images/patterns/creational/abstract-factory-uml.png)
-
-## 🧑‍💻 Code Implementation
-
-### Folder Structure
+For example,
 
 ```text
+StripePaymentGatewayFactory
+
+├── StripePaymentProcessor
+├── StripeRefundProcessor
+└── StripeWebhookHandler
+```
+
+Similarly,
+
+```text
+RazorpayPaymentGatewayFactory
+
+├── RazorpayPaymentProcessor
+├── RazorpayRefundProcessor
+└── RazorpayWebhookHandler
+```
+
+A concrete factory guarantees that compatible products are created together.
+
+### Client
+
+The client depends only on the abstract factory.
+
+```java
+PaymentGatewayFactory factory =
+        new StripePaymentGatewayFactory();
+```
+
+It never creates concrete implementations directly.
+
+As a result, switching providers becomes effortless.
+
+## UML Representation
+
+![UML](/resources/images/patterns/creational/abstract-factory-uml.png)
+
+## Implementation
+
+```text
+app
 ├── product
 │   ├── PaymentProcessor.java
 │   ├── RefundProcessor.java
@@ -81,18 +244,18 @@ This requirement of creating consistent families of related objects is exactly w
     └── Application.java
 ```
 
-### STEP 1 — Abstract Products
+### Abstract Products
 
-1️⃣ **PaymentProcessor**
+**PaymentProcessor**
 
 ```java
 public interface PaymentProcessor {
- 
+
     void processPayment(double amount);
 }
 ```
 
-2️⃣ **RefundProcessor**
+**RefundProcessor**
 
 ```java
 public interface RefundProcessor {
@@ -101,7 +264,7 @@ public interface RefundProcessor {
 }
 ```
 
-3️⃣ **WebhookHandler**
+**WebhookHandler**
 
 ```java
 public interface WebhookHandler {
@@ -110,7 +273,7 @@ public interface WebhookHandler {
 }
 ```
 
-### STEP 2 — Stripe Family Implementation: Concrete Product A
+### Stripe Family Implementation: Concrete Product A
 
 **StripePaymentProcessor**
 
@@ -148,7 +311,7 @@ public class StripeWebhookHandler implements WebhookHandler {
 }
 ```
 
-### STEP 3 — Razorpay Family Implementation: Concrete Product B
+### Razorpay Family Implementation: Concrete Product B
 
 **RazorpayPaymentProcessor**
 
@@ -186,7 +349,7 @@ public class RazorpayWebhookHandler implements WebhookHandler {
 }
 ```
 
-### STEP 4 — Abstract Factory
+### Abstract Factory
 
 ```java
 public interface PaymentGatewayFactory {
@@ -199,7 +362,7 @@ public interface PaymentGatewayFactory {
 }
 ```
 
-### STEP 5 — Concrete Factories
+### Concrete Factories
 
 **Stripe Factory**
 
@@ -245,7 +408,7 @@ public class RazorpayPaymentGatewayFactory implements PaymentGatewayFactory {
 }
 ```
 
-### STEP 6 — Client Code
+### Client Code
 
 ```java
 public class EcommerceApplication {
@@ -274,54 +437,119 @@ Processing refund via Stripe for transaction: TXN12345
 Handling Stripe webhook: payment_success_event
 ```
 
-## 📝 Real life example
+## Execution Flow
 
-1. **Payment gateway providers** Stripe / Razorpay / PayPal
-2. **UI Themes**
-3. **Database Drivers** - MySqlFactory, PostgreSql Factory, They created Connection, QueryExecutor, TransactionManager
+Suppose Stripe is selected.
 
-## 🤔 When to Use 
+The execution flow becomes
 
-1. **You Need Families of Related Objects**
-2. **Objects Must Be Used Together** They are designed to work as a group.
-3. **You Want to Enforce Consistency:** Prevent mixing incompatible implementations.
-4. **You Want System-Level Switching:** Switch provider by changing just one line.
-5. **You Want High-Level Decoupling:** Client should not know:
-    - Concrete classes
-    - How objects are created
-    - How they relate internally
+```text
+EcommerceApplication
+        │
+        ▼
+StripePaymentGatewayFactory
+        │
+        ├────────► StripePaymentProcessor
+        │
+        ├────────► StripeRefundProcessor
+        │
+        └────────► StripeWebhookHandler
+```
 
-## 🤕 When not to use
+If Razorpay is selected instead,
 
-1. Only one product exists
-2. Only one implementation exists
-3. Products are unrelated
-4. Simpler Factory Method is sufficient
+```text
+EcommerceApplication
+        │
+        ▼
+RazorpayPaymentGatewayFactory
+        │
+        ├────────► RazorpayPaymentProcessor
+        │
+        ├────────► RazorpayRefundProcessor
+        │
+        └────────► RazorpayWebhookHandler
+```
 
-## ⚖️ Pros & Cons
+Only the factory changes.
 
-### Pros ✅
+The client code remains exactly the same.
 
-1. **Ensures Product Compatibility:** Prevents mixing unrelated components.
-2. **Strong Abstraction:** Client depends only on interfaces.
-3.  **Open/Closed Principle:** Add new provider without modifying existing code.
-4. **Easy Environment Switching:** Change factory → whole system switches.
-5. **Clean Architecture:** Separates object creation and business logic.
 
-### Cons ❌
+## Factory Method vs Abstract Factory
 
-1. **More Classes:** More interfaces and classes.
-2. **Difficult to Extend:** Adding new products requires modifying all factories.
-3. **Tight Coupling:** Products are tightly coupled to their factory.
-4. **Not Suitable for Simple Systems:** Overkill for simple object creation.
+Many developers confuse these two patterns because both deal with object creation.
 
-## 🎤 Interview One-Liner
+| Factory Method             | Abstract Factory                           |
+| -------------------------- | ------------------------------------------ |
+| Creates one product        | Creates a family of related products       |
+| One factory method         | Multiple factory methods                   |
+| Focuses on one object      | Focuses on object compatibility            |
+| Uses inheritance           | Usually uses composition                   |
+| Example: EmailNotification | Example: Stripe Payment + Refund + Webhook |
 
-Abstract Factory is used when we need to **create families of releated objects** that must work together. It ensures **consistency** and prevents mixing incompatible implementations. In our payment gateway example, it guarantees that Stripe payment, refund, and webhook components are always used together.
+A simple way to remember the difference is:
 
-## 📚 Resources
+- **Factory Method creates one product.**
+- **Abstract Factory creates multiple products that belong together.**
 
-🔗 https://algomaster.io/learn/lld/abstract-factory <br>
-🔗 https://refactoring.guru/design-patterns/abstract-factory <br>
-🔗 https://codewitharyan.com/tech-blogs/abstract-factory-pattern <br>
-🎥 https://www.youtube.com/watch?v=or1wpvH2Yps
+## Real-World Use Cases
+
+The Abstract Factory pattern is commonly used in systems that support multiple implementations of related components.
+
+Examples include:
+
+- Payment gateways (Stripe, Razorpay, PayPal)
+- Database providers (MySQL, PostgreSQL, Oracle)
+- Cloud providers (AWS, Azure, Google Cloud)
+- Cross-platform GUI toolkits (Windows, macOS, Linux)
+- Messaging providers (Kafka, RabbitMQ, ActiveMQ)
+- Logging frameworks
+- Authentication providers (OAuth, LDAP, SAML)
+
+## Trade-Off Analysis
+
+### Advantages
+
+- Guarantees product compatibility.
+- Prevents mixing incompatible implementations.
+- Encapsulates object creation.
+- Supports the Open/Closed Principle.
+- Makes switching entire product families easy.
+- Improves maintainability and scalability.
+
+### Disadvantages
+
+- Introduces many interfaces and classes.
+- Adding a new product type requires updating every concrete factory.
+- Increases architectural complexity for small applications.
+- Can be unnecessary when only one product family exists.
+
+## When to Use vs. When to Avoid
+
+### Use when
+
+Use the Abstract Factory pattern when:
+
+- Multiple related objects must always be used together.
+- You need to prevent incompatible implementations from being mixed.
+- The application supports multiple product families.
+- The client should remain independent of concrete implementations.
+- Switching between implementations should require minimal code changes.
+
+### Avoid when
+
+Avoid the Abstract Factory pattern when:
+
+- The application has only one product family.
+- Products are unrelated to one another.
+- A Factory Method is sufficient.
+- The additional abstraction introduces unnecessary complexity.
+
+## Conclusion
+
+The Abstract Factory Pattern provides a consistent way to create **families of related objects** without exposing their concrete implementations.
+
+By delegating object creation to factories, the client works entirely with abstractions while each concrete factory guarantees that compatible products are created together.
+
+This approach improves maintainability, prevents accidental mixing of incompatible implementations, and makes it easy to switch entire product families by changing only the selected factory. Although the pattern introduces additional classes, it becomes invaluable in large applications that support multiple providers, platforms, or environments.
