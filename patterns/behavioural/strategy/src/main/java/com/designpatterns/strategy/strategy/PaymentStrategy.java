@@ -8,10 +8,10 @@ import java.math.BigDecimal;
  */
 public interface PaymentStrategy {
 
-  /**
-   * Process payment for the given amount.
-   *
-   * @param amount amount to be paid
-   */
-  void pay(BigDecimal amount);
+    /**
+     * Process payment for the given amount.
+     *
+     * @param amount amount to be paid
+     */
+    void pay(BigDecimal amount);
 }
