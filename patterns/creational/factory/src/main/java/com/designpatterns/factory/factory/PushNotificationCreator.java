@@ -3,13 +3,10 @@ package com.designpatterns.factory.factory;
 import com.designpatterns.factory.implementation.PushNotification;
 import com.designpatterns.factory.model.Notification;
 
-/**
- * Concrete Creator
- */
 public class PushNotificationCreator extends NotificationCreator {
 
-  @Override
-  public Notification createNotification() {
-    return new PushNotification();
-  }
+    @Override
+    public Notification createNotification() {
+        return new PushNotification();
+    }
 }
