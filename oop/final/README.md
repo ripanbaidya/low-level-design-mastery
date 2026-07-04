@@ -1,138 +1,132 @@
-# "final" keyword
+## The "final" Keyword in Java
 
-While **inheritance** enables us to reuse existing code, sometimes we do need to set limitations on extensibility for various reasons; the **final** keyword allows us to do exactly that.
+<p align="right">Last updated - 04.07.2026</p>
 
-In this article, we’ll take a look at what the **final** keyword means for:
-**classes**, **methods**, and **variables**.
+## Introduction
 
-## 1️⃣ final class
+In Java, the `final` keyword is a non-access modifier used to restrict extensibility, modification, and reassignment. It serves as a tool for enforcing immutability, ensuring API security, and optimizing runtime performance.
 
-Classes marked as **final** can’t be extended. If we look at the code of Java core libraries, we’ll find many **final** classes there. One example is the `String` class.
+The application of `final` fundamentally alters the behavior of **classes**, **methods**, and **variables**.
 
-**Example**
+## 1. Final Classes
+
+A class declared as `final` **cannot be subclassed** or extended. This cuts off the inheritance tree at that specific node.
 
 ```java
 final class Vehicle {
+    // Structural implementation
 }
 
-class Car extends Vehicle { // ❌ Compilation Error
-}
+// class Car extends Vehicle { }
+// ❌ Compile-time error: Cannot inherit from final 'utility.Vehicle'
+
 ```
 
-Real example from Java - `String`, `Integer`, `Double` etc. are final
+### Architectural Rationale
 
-> **Why?** 🤔 Because of immutability and security.
+- **Immutability Contracts:** Core Java library classes such as `java.lang.String`, `java.lang.Integer`, and `java.lang.Double` are marked `final`. If `String` were not final, a subclass could override behaviors to masquerade as a secure string while secretly altering data, compromising JVM security.
+- **Performance Optimization:** The compiler and JVM can optimize method calls within `final` classes (e.g., via aggressive method inlining), knowing that no subclass will ever alter the behavior.
 
-## 2️⃣ final method
+## 2. Final Methods
 
-A method declared **final** cannot be **overridden** in a **subclass**.
+A method declared as `final` **cannot be overridden** by any subclass.
 
 ```java
 class Parent {
-    final void show() {
-        System.out.println("This cannot be overridden");
+    public final void computeMetrics() {
+        System.out.println("Executing unalterable core engine logic.");
     }
 }
 
 class Child extends Parent {
+    // @Override
+    // public void computeMetrics() { }
+    // ❌ Compile-time error: 'computeMetrics()' cannot override 'computeMetrics()' in 'Parent'; overridden method is final
+}
 
-    @Override
-    void show() { // ❌ Compilation Error
+```
+
+### Architectural Rationale
+
+- **Preserving Invariants:** Use `final` methods when the base class prescribes a rigid control loop or algorithmic sequence (e.g., the Template Method Design Pattern) that sub-classes must not corrupt.
+- **Security Barriers:** Critical system check operations should be marked `final` to prevent malicious actors from extending the component and overriding security verifications to return `true`.
+
+## 3. Final Variables
+
+Marking a variable `final` guarantees that its value mapping can be assigned **exactly once**. Once initialized, any attempt to rebind the variable results in a compile-time error.
+
+### 3.1 Primitive Variables
+
+For primitives, `final` freezes the literal value itself.
+
+```java
+public void calculate() {
+    final int baseThreshold = 100;
+    // baseThreshold = 200;
+    // ❌ Compile-time error: Cannot assign a value to final variable 'baseThreshold'
+}
+
+```
+
+### 3.2 Reference Variables
+
+For reference variables, `final` freezes the **memory address pointer** held by the reference variable. It does **not** make the underlying heap object immutable.
+
+```java
+class Cat {
+    private int weight;
+    public void setWeight(int w) { this.weight = w; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        final Cat cat = new Cat(); // Allocated address e.g., @0x9f is locked into 'cat'
+
+        // cat = new Cat();
+        // ❌ Compile-time error: Cannot reassign final variable 'cat'
+
+        cat.setWeight(5); // ✅ Completely valid: Internal object state is mutable
     }
 }
+
 ```
 
-**👉 Why use it?**
+### 3.3 Static Final Variables (Constants)
 
-✅ To prevent modification of important behavior. <br>
-✅ Used in security-sensitive logic.
-
-## 3️⃣ final variables
-
-When a variable is declared **final**, its value cannot be changed once assigned.
-
-### 3️⃣·1️⃣ final primitive variables
-
-Let’s declare a primitive final variable `i`, then assign 1 to it.
-
-And let’s try to assign a value of 2 to it:
+Used to create compile-time thread-safe constants. By convention, these are named using `UPPER_CASE` with underscore separators.
 
 ```java
-public void whenFinalVariableAssign_thenOnlyOnce() {
-    final int i = 1;
-    //...
-    i=2;
+public class AppConfig {
+    public static final double PLANCK_CONSTANT = 6.62607015e-34;
 }
-```
-
-The compiler says:
 
 ```
-The final local variable i may already have been assigned
-```
 
-### 3️⃣·2️⃣ final reference variables
+- `static`: Accessible via class metadata context without instantiating objects.
+- `final`: Value cannot be altered post-class-loading.
 
-If we have a **final reference variable**, we can’t **reassign** it either. But this doesn’t mean that the object it refers to is immutable. We can change the properties of this object freely.
+### 3.4 Final Parameters
 
-To demonstrate this, let’s declare the final reference variable `cat` and initialize it:
+Declaring method arguments as `final` locks the local variable parameter inside the scope of the method execution thread frame, preventing accidental modification within the method body.
 
 ```java
-final Cat cat = new Cat();
-```
-
-If we try to reassign it we’ll see a compiler error:
-
-```
-The final local variable cat cannot be assigned. It must be blank and not using a compound assignment
-```
-
-But we can change the properties of Cat instance:
-
-```java
-cat.setWeight(5);
-assertEquals(5, cat.getWeight());
-```
-
-### 3️⃣·3️⃣ final static variables
-
-```java
-class AppConfig {
-    static final double PI = 3.14159;
+public void processTransaction(final double orderTotal) {
+    // orderTotal = orderTotal * 0.90;
+    // ❌ Compile-time error: The final local variable orderTotal cannot be assigned
 }
-```
-
-👉 **Convention:** Use `UPPER_CASE` for static final constants.
-
-### 3️⃣·4️⃣ final parameters
-
-The final keyword is also legal to put before method parameters. A final parameter can’t be changed inside a method:
-
-```java
-public void methodWithFinalArguments(final int x) {
-    x=1;
-}
-```
-
-The above assignment causes the compiler error:
 
 ```
-The final local variable x cannot be assigned. It must be blank and not using a compound assignment
-```
 
-## 🎯 Quick Summary
+## Architectural Impact
 
-👉 final variable → cannot reassign <br>
-👉 final method → cannot override <br>
-👉 final class → cannot inherit <br>
-👉 final reference → reference fixed, object mutable
+| Application Target | Structural Constraint                                    | Architectural Value                                                                             |
+| ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Class**          | Prevents class extension/inheritance.                    | Guarantees immutability frameworks, closes security vulnerabilities, enables compiler inlining. |
+| **Method**         | Blocks polymorphism overriding in child classes.         | Safeguards design patterns (Template Method), locks critical business logic.                    |
+| **Variable**       | Prevents value or memory address reference reassignment. | Ensures reference thread-safety, establishes global constants, protects local scopes.           |
 
-## Conclusion
+## Production Design Principles
 
-In this article, we learned what the final keyword means for classes, methods, and variables. Although we may not use the final keyword often in our internal code, it may be a good design solution.
-
-## Resources
-
-🕰️ **Last Updated At: 24.02.2026**
-
-- https://www.baeldung.com/java-final
+- **Design for Inheritance or Else Prohibit It:** Follow Joshua Bloch's advice in _Effective Java_. If a class isn't explicitly designed, documented, and tested to support safe inheritance subclasses, explicitly mark it `final`.
+- **Thread Safety via Immutability:** Combining `private final` fields inside a class without exposing setters is the simplest mechanism for creating thread-safe immutable objects (e.g., Value Objects/DTOs) that require no synchronized block overhead in highly concurrent environments.
+- **Effectively Final:** Since Java 8, local variables that are not explicitly marked `final` but do not change values after initialization are treated as _effectively final_. This allows them to be safely captured by Lambdas and Anonymous Inner Classes without explicit boilerplate code.
