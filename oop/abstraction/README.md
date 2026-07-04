@@ -1,4 +1,6 @@
-# Abstraction in Object-Oriented Programming (OOP)
+## Abstraction in Object-Oriented Programming (OOP)
+
+<p align="right">Last updated - 04.07.2026</p>
 
 ## Introduction
 
@@ -9,22 +11,22 @@ Abstraction in Java is mainly achieved using:
 1. **Abstract Classes**
 2. **Interfaces**
 
-## **What is Abstraction?**
+## What is Abstraction?
 
 **Abstraction** means showing only the **essential details** and hiding the **implementation**. It allows programmers to focus on **what an object does** rather than **how it does it**.
 
-### **Key Benefits of Abstraction**
+### Key Benefits of Abstraction
 
 - **Reduces complexity**: Hides unnecessary implementation details.
 - **Increases code reusability**: Encourages the reuse of abstracted logic.
 - **Enhances security**: Protects internal object details from unintended modifications.
 - **Improves maintainability**: Makes code easier to manage and update.
 
-## **1. Abstraction Using Abstract Classes**
+### 1. Abstraction Using Abstract Classes
 
 An **abstract class** in Java is a class that cannot be instantiated. It is used to define common behavior that multiple subclasses should implement.
 
-### **Example: Abstract Class in Java**
+### Example
 
 ```java
 // Abstract class
@@ -66,24 +68,24 @@ public class Main {
 }
 ```
 
-### **Output:**
+Output:
 
 ```
 Brand: Toyota
 Car is starting...
 ```
 
-**Why Use Abstract Classes?**
+Why Use Abstract Classes?
 
 - Allows defining common behavior that subclasses must implement.
 - Enables partial abstraction (can have both abstract and concrete methods).
 - Prevents direct instantiation of base classes.
 
-## **2. Abstraction Using Interfaces**
+### 2. Abstraction Using Interfaces
 
 An **interface** in Java is a blueprint that defines a contract for classes to follow. It contains **only abstract methods** (until Java 8 introduced default and static methods).
 
-### **Example: Interface in Java**
+### Example
 
 ```java
 // Defining an interface
@@ -131,29 +133,24 @@ Cat meows
 - Supports **multiple inheritance** in Java (a class can implement multiple interfaces).
 - Provides a standard way for different classes to implement behaviors.
 
-## **Abstract Class vs Interface: Key Differences**
+## Abstract Class vs Interface - Architectural Comparison
 
-| Feature | Abstract Class | Interface |
-||-|--|
-| **Inheritance** | A class **extends** only **one** abstract class | A class **implements multiple** interfaces |
-| **Methods** | Can have **abstract + concrete** methods | Only abstract methods (before Java 8) |
-| **Default Methods** | Concrete methods work without `default` keyword | Supports `default` methods (Java 8+) |
-| **Static Methods** | Can have static methods | Supports static methods (Java 8+) |
-| **Fields** | Can have **instance variables** (non-final) | Only **public static final** (constants) |
-| **Constructor** | Can have constructors | **No constructors** allowed |
-| **Multiple Inheritance** | Not supported (only **single** inheritance) | Supports **multiple** inheritance |
-| **Access Modifiers** | Methods/fields can be `public`, `protected`, `private`, or default | Methods are `public` by default |
-| **Purpose** | **Partial implementation** (code reuse) | **Full abstraction** (contract definition) |
-| **Object Creation** | Cannot be instantiated directly | Cannot be instantiated directly |
-| **`super` Keyword** | Can use `super()` to call parent constructor | No `super()` (no constructors) |
-| **Private Methods** | Supports `private` methods (Java 9+) | Supports `private` methods (Java 9+) |
-| **`final` Methods** | Can have `final` methods | Cannot have `final` methods |
+Choosing between an abstract class and an interface dictates how your system scales. Use the architectural comparison below to guide your design choices.
 
-## **Real-World Example: Payment System**
+| Architectural Feature    | Abstract Class                                           | Interface                                                    |
+| ------------------------ | -------------------------------------------------------- | ------------------------------------------------------------ |
+| **Relationship Model**   | **IS-A** relationship (Strict hierarchy)                 | **CAN-DO** relationship (Capabilities/Behavior)              |
+| **Inheritance Limit**    | Single inheritance (A class can extend only one class)   | Multiple inheritance (A class can implement many interfaces) |
+| **State Management**     | Can hold instance fields (mutable, private, protected)   | Constants only (`public static final`)                       |
+| **Constructors**         | Allowed; used to initialize base class state             | Banned; cannot hold instantiable state                       |
+| **Evolution/Changes**    | Safe to add concrete methods without breaking subclasses | Adding a standard abstract method breaks implementers        |
+| **Behavioral Injection** | Restricted to the inheritance tree                       | Allows `default` (Java 8+) and `private` (Java 9+) methods   |
+
+## Real-World Example: Payment System
 
 Abstraction is widely used in real-world applications, such as payment processing.
 
-### **Example: Payment System with Abstraction**
+### Example: Payment System with Abstraction
 
 ```java
 // Abstract class for Payment
@@ -203,7 +200,7 @@ public class Main {
 }
 ```
 
-### **Output:**
+Output:
 
 ```
 Paid 150.75 using Credit Card
@@ -218,4 +215,5 @@ Paid 200.50 using PayPal
 
 ## Resources
 
-🕰️ Last Update At: **23.02.2026**
+- https://www.baeldung.com/java-abstract-class
+- https://www.baeldung.com/java-interface-vs-abstract-class
