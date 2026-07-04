@@ -1,67 +1,46 @@
-# Classes and Objects 🚀
+## Classes and Objects
 
-**Classes** and **Objects** are the foundation of **Object-Oriented Programming (OOP)**. They help us represent real-world entities in code.
+<p align="right">Last updated - 04.07.2026</p>
 
-## What is a Class?
+## Introduction
 
-A **class** is a blueprint or template used to create objects.
+Classes and objects form the foundational building blocks of Object-Oriented Programming (OOP). They provide the mechanism to translate real-world entities into modular, maintainable, and structured source code. For software engineers, understanding the deep relationship between class structures, object instantiation, and memory mechanics is critical for building performant applications.
 
-It defines:
+## 1. What is a Class?
 
-- What data an object will have → **Attributes (Fields)**
-- What actions an object can perform → **Methods**
+A **class** is a programmer-defined blueprint, template, or data type from which individual objects are created. It establishes a contract defining what data an object will maintain and what behaviors it can perform.
 
-Think of a class as a design plan.
+A class defines two primary components:
+
+- **Attributes (Fields / State):** The structural variables that store the data or current state of the object.
+- **Methods (Behaviors):** The functional blocks of code that operate on the state and define what the object can do.
 
 ### Defining a Class in Java
 
-To define a class in Java, we use the `class` keyword followed by the class name.
-
 ```java
-// Class definition (Blueprint)
+// Class definition acting as the blueprint
 class Car {
-
-    // Attributes (Instance variables) -> define state
+    // Attributes (State) - Encapsulated via private access modifiers
     private String name;
     private String color;
 
-    // Constructor -> initializes object data
+    // Constructor - Initializes the object instance state in memory
     public Car(String name, String color) {
         this.name = name;
         this.color = color;
     }
 
-    // Method -> defines behavior
+    // Method (Behavior) - Exposes functionality to external callers
     public void start() {
         System.out.println(name + " has started.");
     }
 }
+
 ```
 
-⭐️ Here, You might be wondering what are `private`, `public`, `String`, `void`, etc. These are called **access modifiers** and **data types**.
+### UML Representation
 
-⭐️ Here, will will discuss a bit about attributes, and methods. and the constructor part will be convered in detail in other sections.
-
-🔹 **Attributes (State)**: These define the **state** of the object.
-
-```java
-private String name;
-private String color;
-```
-
-🔹 **Constructor**: Special method that runs when object is created.
-
-```java
-public Car(String name, String color)
-```
-
-🔹 **Method (Behavior)**: Defines what the object can do.
-
-```java
-public void start()
-```
-
-## UML
+Unified Modeling Language (UML) provides a standard notation to visualize a class structure:
 
 ```
 +--------------------------+
@@ -73,136 +52,75 @@ public void start()
 | + Car(name, color)       |
 | + start(): void          |
 +--------------------------+
+
 ```
 
-**Note**: Don't worry about the symbols for now. We will discuss them in detail in other sections.
+- `-` denotes `private` access visibility.
+- `+` denotes `public` access visibility.
 
-## What is an Object?
+## 2. What is an Object?
 
-An **object** is a real entity created from a class.
+An **object** is a self-contained, concrete instance of a class that exists at runtime. While a class is a compile-time structural blueprint that consumes no memory space, an object is the live instantiation that allocates memory and holds real values.
 
-👉 Object = Instance (both mean the same)
+### Instantiating Objects in Java
 
-When you create an object:
-
-- Memory is allocated in the heap
-- Data is stored
-- Methods are stored
-
-### Creating Objects in Java
-
-To create an object, we use the `new` keyword.
+The `new` keyword is used to bring an object to life at runtime:
 
 ```java
 public class Main {
     public static void main(String[] args) {
-
-        // car1 and car2 are reference variables
+        // car1 and car2 are separate reference variables pointing to distinct objects
         Car car1 = new Car("Toyota", "Red");
         Car car2 = new Car("Honda", "Blue");
 
+        // Executing behaviors on the instances
         car1.start();
         car2.start();
     }
 }
-```
-
-### What Happens Internally?
-
-When you write:
-
-```java
-Car car1 = new Car("Toyota", "Red");
-```
-
-Three things happen:
-
-1️⃣ **Instantiation**
-`new` creates an object in heap memory.
-
-2️⃣ **Initialization**
-Constructor sets values (`Toyota`, `Red`).
-
-3️⃣ **Reference Assignment**
-`car1` stores the memory address of that object.
-
-### 🧠 Memory Understanding (Very Important)
-
-![image](/resources/images/oop/class-and-object.png)
-
-### Think Like This:
 
 ```
-Stack Memory                Heap Memory
--------------              -------------------
-                            +---------------+
-car1  -----------▶          | Car Object    |
-                            | name = Toyota |
-                            | color = Red   |
-                            +---------------+
-```
 
-- ✔ The object lives in **heap memory**
-- ✔ `car1` is a **reference** in stack memory
-- ✔ The reference points to the object
+### Runtime Execution Mechanics
 
-## Summary
+Executing the statement `Car car1 = new Car("Toyota", "Red");` triggers a strict three-step sequence within the Java Virtual Machine (JVM):
 
-1️⃣ **Attributes**
+1. **Allocation (Instantiation):** The `new` keyword instructs the JVM to allocate a block of memory dynamically inside the **Heap** region to house the object's instance data.
+2. **Initialization:** The target constructor (`Car(...)`) is invoked immediately to assign the provided baseline arguments (`"Toyota"`, `"Red"`) to the newly allocated instance variables.
+3. **Reference Assignment:** The memory address pointing directly to the heap object is bound to the stack reference variable (`car1`).
 
-Fields that define object state.
-Example: `name`, `color`
+## 3. JVM Memory Architecture
 
-2️⃣ **Methods**
+To write deterministic, bug-free applications, an SDE must visualize exactly how the JVM manages memory allocation across the **Stack** and the **Heap** frames.
 
-Functions that define object behavior.
-Example: `start()`
+![class-and-object](/resources/images/oop/classandobject.png)
 
-3️⃣ **Object**
+### The Stack Segment
 
-The real entity created in heap memory.
+- Houses the execution thread contexts, local variables, and method call frames.
+- Stores the **reference variable** (`car1`). The reference variable does _not_ contain the object data; it holds the specific hex memory pointer (address) pointing to the actual data location.
 
-Example:
+### The Heap Segment
 
-```java
-new Car("Toyota", "Red")
-```
+- Houses all dynamically created runtime objects.
+- Holds the actual value states (`name = "Toyota"`, `color = "Red"`). Objects persist on the heap until they have no active references pointing to them, making them eligible for Garbage Collection (GC).
 
-4️⃣ **Instance**
-
-Same as object.
-No difference in Java.
-
-5️⃣ **Reference**
-
-A variable that stores the address of an object.
-
-Example:
-
-```java
-Car car1
-```
-
-👉 `car1` is NOT the object, It is a reference variable that points to the object.
-
-### 🎯 The Most Confusing Line
+### Deconstructing the Instantiation Syntax
 
 ```java
 Car c1 = new Car("Toyota", "Red");
+
 ```
 
-| Part           | Meaning            |
-| -------------- | ------------------ |
-| `Car`          | Type               |
-| `c1`           | Reference variable |
-| `new Car(...)` | Object creation    |
-| Object         | Lives in heap      |
-| c1             | Points to object   |
+| Syntax Component       | Architectural Role         | JVM Execution Domain                                  |
+| ---------------------- | -------------------------- | ----------------------------------------------------- |
+| `Car`                  | **Data Type**              | Evaluated during compilation                          |
+| `c1`                   | **Reference Variable**     | Allocated inside the local **Stack** frame            |
+| `new`                  | **Allocation Operator**    | Instantiates raw memory layout inside the **Heap**    |
+| `Car("Toyota", "Red")` | **Constructor Invocation** | Injects initial state attributes into the heap object |
 
+## Key Principles
 
-## Conclusion
+- **Reference vs. Value Semantics:** Passing an object reference as a method argument passes a copy of the _address pointer_ (Call-by-value of the reference). Modifying the internal state properties of that object inside the method alters the unified shared heap instance, impacting all components holding that reference.
 
-## Resources
-
-- https://www.geeksforgeeks.org/java/classes-objects-java/
-- https://www.baeldung.com/java-classes-objects
+- **Preventing Memory Leaks:** Unintentional retention of reference pointers in long-lived collections prevents the Garbage Collector from freeing dead heap space, eventually degrading performance. Always explicitly clear references or bounds when an object lifecycle terminates.
