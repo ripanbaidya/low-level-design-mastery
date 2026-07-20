@@ -1,5 +1,7 @@
 ![lld-banner](/resources/images/banner.png)
 
+<p align="right">Last updated: 29.06.26, Mon</p>
+
 This repository contains all the resources needed to crack **LLD interviews** at big tech companies.<br>
 I am keeping my **notes** and all the **resources** I create and curate from various sources organized in one place.
 
@@ -23,9 +25,11 @@ What you will find in this **repository**
 ## Design Principles
 
 - [SOLID](/principles/solid/)
-- [DRY](/principles/dry/)
-- [KISS](/principles/kiss/)
-- [YAGNI](/principles/yagni/)
+- [DRY - Don't Repeat Yourself](/principles/dry/)
+- [KISS - Keep It Simple, Stupid](/principles/kiss/)
+- [YAGNI - You Aren't Gonna Need It](/principles/yagni/)
+- [SOC - Separation of Concerns](/principles/soc/)
+- [LOD - Law of Demeter](/principles/lod/)
 
 ## Design Patterns
 
