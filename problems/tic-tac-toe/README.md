@@ -1,3 +1,4 @@
-## Design Tic Tac Toe
+# Design Tic Tac Toe
 
-[Click here](/problems/_solutions/src/main/java/com/solution/tic_tac_toe/) to check the solution.
+<p align="right">Last updated - 20.07.2026</p>
+
